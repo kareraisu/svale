@@ -2,6 +2,7 @@
 // afect the deployment and dowload
 
 import svelte from "rollup-plugin-svelte";
+import replace from '@rollup/plugin-replace';
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
@@ -26,7 +27,13 @@ export default {
         css.write("public/bundle.css");
       }
     }),
-
+    // replace tokens on compile,
+    // needed for accessing node env vars
+    replace({
+      'ENV.WA_NUMBER':`'${process.env.WA_NUMBER}'`,
+      'ENV.EMAIL':`'${process.env.EMAIL}'`,
+      'ENV.API': `'${process.env.API}'`,
+    }),
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In
     // some cases you'll need additional configuration —

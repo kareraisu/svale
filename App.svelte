@@ -1,190 +1,258 @@
 <script>
-  import { items } from "./store";
-  import { Modal } from "svelte-chota";
-  import Card from "./Card.svelte";
-  import { data } from "./dummyData";
-  import ENV from './.env';
+    import { items } from "./store"
+    import { Modal } from "svelte-chota"
+    import Card from "./Card.svelte"
+    import { data } from "./dummyData"
 
-  const DEV = true;
-  const ALL = "Todo";
-  let category = ALL;
-  let categories = [];
-  let welcome = true;
-  let checkout = 0;
-  let nombre = "";
+    let ENV = {}
+    const DEV = true
+    const ALL = "Todo"
+    let category = ALL
+    let categories = []
+    let welcome = true
+    let checkout = 0
+    let nombre = ""
 
-  $: filtered =
-    category == ALL ? $items : $items.filter(e => e.categoria === category);
-  $: favs = $items.filter(e => e.fav);
-  $: total = favs
-    .map(e => (typeof e.precio == "number" ? e.precio : 0))
-    .reduce((a, b) => a + b, 0);
-  $: listado =
-    `A ${nombre} le gustó lo siguiente: /n/n` +
-    favs.map(e => e.nombre + " " + e.precio).join("/n") +
-    "/n/nTotal: " +
-    total;
-  $: waref = `https://wa.me/${ENV.WA}?text=${encodeURI(listado)}`;
-  $: mailref = `mailto:${ENV.MAIL}?subject=${encodeURI(
-    `[Super Venta] Listado de ${nombre}`
-  )}&body=${encodeURI(listado)}`;
+    $: filtered =
+        category == ALL
+            ? $items
+            : $items.filter((e) => e.categoria === category)
+    $: favs = $items.filter((e) => e.fav)
+    $: total = favs
+        .map((e) => (typeof e.precio == "number" ? e.precio : 0))
+        .reduce((a, b) => a + b, 0)
+    $: listado = `Hola! Soy ${nombre}. Estuve chusmeando tu Super Venta y me gustó lo siguiente:
 
-  function setData(data) {
-    categories = [ALL, ...new Set(data.map(e => e.categoria))];
-    items.set(data);
-  }
+${favs.map((e) => e.nombre + "\t\t $" + e.precio).join("\n")}
 
-  async function fetchData() {
-    const res = await fetch(ENV.API);
-    if (res.ok)
-      try {
-        const data = await res.json();
-        setData(data.products);
-      } catch (err) {}
-  }
+Total: $${total}`
 
-  DEV ? setData(data) : fetchData();
+    $: waref = `https://wa.me/${ENV.WA_NUMBER}?text=${encodeURI(listado)}`
+    $: mailref = `mailto:${ENV.EMAIL}?subject=${encodeURI(`[Super Venta] Listado de ${nombre}`)}&body=${encodeURI(listado)}`
+
+    function setData(data) {
+        categories = [ALL, ...new Set(data.map((e) => e.categoria))]
+        items.set(data)
+    }
+
+    async function fetchData() {
+        const res = await fetch(ENV.API)
+        if (res.ok)
+            try {
+                const data = await res.json()
+                setData(data.products)
+            } catch (err) {}
+    }
+
+    DEV ? setData(data) : fetchData()
+
 </script>
 
-<style>
-  @import "https://unpkg.com/chota@latest";
-
-  :global(:root) {
-    --bg-color: #222;
-    --bg-secondary-color: #f3f3f6;
-    --color-primary: #14854f;
-    --color-lightGrey: #d2d6dd;
-    --color-grey: #747681;
-    --color-darkGrey: #3f4144;
-    --color-error: #d43939;
-    --color-success: #28bd14;
-    --grid-maxWidth: 120rem;
-    --grid-gutter: 2rem;
-    --font-size: 1.8rem;
-    --font-color: #333333;
-    --font-family-sans: sans-serif;
-    --font-family-mono: monaco, "Consolas", "Lucida Console", monospace;
-  }
-  :global(hr) {
-    background-color: var(--color-darkGrey);
-    height: 1.5px;
-    margin: 2.5rem auto;
-    width: 90%;
-  }
-  :global(.modal) {
-    min-width: 600px !important;
-    padding: 4rem;
-  }
-  :global(.scale:hover) {
-    transform: scale(1.05);
-  }
-  :root {
-    font-size: 12px;
-  }
-
-  main {
-    padding: 3rem;
-  }
-
-  .content {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-gap: 2.5rem;
-  }
-
-  .controls {
-    display: flex;
-    align-items: center;
-    margin: 20px 0;
-  }
-  .controls > * {
-    margin-right: 15px;
-  }
-  .contact {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    z-index: 1;
-  }
-  thead,
-  tbody,
-  tfoot {
-    display: block;
-  }
-  tbody {
-    overflow-y: scroll;
-    max-height: 200px;
-  }
-  thead th:nth-child(1),
-  tbody td:nth-child(1),
-  tfoot td:nth-child(1) {
-    width: 400px;
-  }
-</style>
-
 <main>
+    <Modal class="card modal"
+        bind:open={welcome}
+        on:keydown={e =>['Escape'].includes(e.key) && (welcome = false)}
+    >
+        <h2 class="textc">🎊 Super Venta de Ale y Caro 🎉</h2>
+        <h4 class="textc">Hola! 👋</h4>
+        <p>
+            Estamos haciendo limpieza y tenemos varias cosas
+            que te pueden llegar a interesar...
+        </p>
 
-  <Modal bind:open={welcome} class='card modal'>
-    <h1>Super Venta de Ale y Caro</h1>
-    <h4>Bienvenide!<br>
-    Estamos haciendo limpieza y tenemos varias cosas que te pueden llegar a interesar...
-    </h4>
+        <hr>
 
-    <h4>Instrucciones</h4>
-    <ol>
-      <li>Chusmeá lo que tenemos (podés clickear las tarjetas para ver más detalles).</li>
-      <li>Favoriteá lo que te guste (dale al 🤍 en el detalle de una tarjeta).</li>
-      <li>Una vez que termines, dale al 'Listo!' abajo a la derecha.</li>
-    </ol>
+        <h4 class="textc">📋 Instrucciones</h4>
+        <ol>
+            <li>👀 Chusmeá lo que tenemos <small>(clickeá las fotos)</small></li>
+            <li>🤍 favoriteá lo que te guste</li>
+            <li>Dale al <span class="button bg-primary">👍 Listo!</span> <small>(abajo a la derecha)</small>
+            para mandarnos tu listado por whatsapp o mail y luego poder coordinar la venta</li>
+        </ol>
+        <p>
+            Aceptamos efectivo, transferencia o podemos hacerte un link de mercadopago
+            para que puedas usar el medio de pago que prefieras.
+        </p>
 
-    <p>Esperamos que encuentres algo de tu agrado!</p>
-    <button on:click={e => welcome = false}>A chusmear!</button>
-  </Modal>
+        <hr>
 
-  <Modal bind:open={checkout} class='card modal'>
+        <p class="textc">Esperamos que encuentres algo de tu agrado! 😊</p>
+        <div class="spaced controls">
+            <button class="bg-primary"
+                tabindex="0"
+                on:click={(e) => (welcome = false)}>👀 A chusmear!</button>
+        </div>
+    </Modal>
 
-  {#if checkout == 1}
-    <h3>Esto es lo que favoriteaste:</h3>
-<table>
-<thead><tr><th>Nombre</th><th>Precio</th></tr></thead>
-<tbody>
-    {#each favs as item}
-  <tr><td>{item.nombre}</td><td>$ {item.precio}</td></tr>
-    {/each}
-    </tbody>
-    <tfoot><tr><td>Total:</td><td>$ {total}</td></tr></tfoot>
-</table>
-<button on:click={e => checkout = 2}		>Sip, ya estoy</button>
-<button on:click={e => checkout = 0}		>Seguir chusm eando</button>
-{/if}
+    <Modal class="card modal"
+        bind:open={checkout}
+        on:keydown={e =>['Escape'].includes(e.key) && (checkout = 0)}
+    >
+        {#if !favs.length}
+        <div class="compact textc msg">
+            <h1>😅</h1>
+            <h4>Aún no favoriteaste nada...</h4>
+            <p>Cuando encuentres algo que te guste, clickeá el 🤍!</p>
+            <button class="bg-primary" on:click={(e) => (checkout = 0)}>OK</button>
+        </div>
+        {/if}
 
-  {#if checkout == 2}
-    <p>Ingresa tu nombre y elegí el medio de contacto que prefieras:</p>
-    <input type="text" bind:value={nombre}/>
-    <a class='button' href={waref}      >Whatsapp</a>
-    <a class='button' href={mailref}      >Email</a>
-    {/if}
-  </Modal>
+        {#if favs.length && checkout == 1}
+            <h3>Estos son tus favoritos ❤️</h3>
+            <table>
+                <thead><tr><th>Nombre</th><th>Precio</th></tr></thead>
+                <tbody>
+                    {#each favs as item}
+                        <tr><td>{item.nombre}</td><td>$ {item.precio}</td></tr>
+                    {/each}
+                </tbody>
+                <tfoot><tr class="bold"><td>Total:</td><td>$ {total}</td></tr></tfoot>
+            </table>
+            <div class="spaced controls">
+                <button class="bg-primary"
+                    on:click={(e) => (checkout = 2)}>👌 Perfecto, ya estoy</button>
+                <button on:click={(e) => (checkout = 0)}>👀 Seguir chusmeando</button>
+            </div>
+        {/if}
 
-  <div class='controls'>
-    <div>Categorias:</div>
+        {#if favs.length && checkout == 2}
+            <h3>Mandanos tu listado!</h3>
+            <p>1. Ingresá tu nombre: <input type="text" bind:value={nombre} /></p>
+            {#if nombre}
+                <p>2. Elegí el medio de contacto que prefieras:</p>
+                <div class="spaced controls">
+                    <a href={waref} class="textc">
+                        <img height="100%"
+                            src="https://image.flaticon.com/icons/png/128/1384/1384055.png"
+                            alt="Whatsapp">
+                        <div>Whatsapp</div>
+                    </a>
+                    <a href={mailref} class="textc">
+                        <img height="100%"
+                            src="https://image.flaticon.com/icons/png/128/893/893257.png"
+                            alt="Email">
+                        <div>Email</div>
+                    </a>
+                </div>
+                <hr>
+                <div class="compact textc">
+                    <h1>😃</h1>
+                    <h3>Gracias por tu tiempo!</h3>
+                    <p>Te responderemos a la brevedad</p>
+                </div>
+            {/if}
+        {/if}
+    </Modal>
 
-      {#each categories as cat}
-      <button
-        class={category == cat ? 'bg-primary' : ''}
-        on:click={e => category = cat}
-                  >{cat}</button>
-      {/each}
+    <div class="wrap controls">
+        <div class="hide-phone">Categorias:</div>
+        {#each categories as cat}
+            <button
+                class={category == cat ? "bg-primary" : ""}
+                on:click={(e) => (category = cat)}>{cat}</button
+            >
+        {/each}
 
-      <button class='contact scale'
-      on:click={e => checkout = 1}
-      >Listo!</button>
-  </div>
+        <button class="contact scale bg-primary"
+            on:click={(e) => (checkout = 1)}
+        >👍 Listo!</button>
+    </div>
 
-  <div class='content'>
-  {#each filtered as d}
-    <Card data={d}  />
-    {/each}
-  </div>
-
+    <div class="content">
+        {#each filtered as d}
+            <Card data={d}/>
+        {/each}
+    </div>
 </main>
+
+<style>
+
+    main {
+        padding: 4rem;
+        padding-top: 0 !important;
+    }
+
+    .content {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        grid-gap: 2rem;
+    }
+
+    .contact {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 1;
+    }
+
+    .msg {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 20rem;
+        margin: auto;
+    }
+
+    table {
+        margin-bottom: 1rem;
+    }
+    thead,
+    tbody,
+    tfoot {
+        display: block;
+    }
+    tbody {
+        overflow-y: scroll;
+        max-height: calc(100vh - 37rem);
+    }
+    thead th:nth-child(1),
+    tbody td:nth-child(1),
+    tfoot td:nth-child(1) {
+        width: 20rem;
+    }
+
+    .compact > h1,
+    .compact > h3,
+    .compact > h4,
+    .compact > p {
+        margin: 0;
+    }
+
+    @media (max-width: 900px) {
+        :global(.modal) {
+            width: 80vw;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        .content {
+            grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+            grid-gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 500px) {
+        :global(.modal) {
+            height: 100vh;
+            width: 100vw;
+        }
+
+        main {
+            padding: 1rem;
+        }
+
+        .content {
+            grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+            grid-gap: 1rem;
+        }
+
+        .hide-phone {
+            display: none;
+        }
+    }
+
+</style>
