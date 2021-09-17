@@ -40,7 +40,7 @@ Total: $${total}`
         if (res.ok)
             try {
                 const data = await res.json()
-                setData(data.products)
+                setData(data.products.filter(el => el.desc && el.foto))
             } catch (err) {}
     }
 
