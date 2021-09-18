@@ -12,7 +12,7 @@
 		$items[i] = data
 		setTimeout(() => {
 			detail = false
-		}, 250); 
+		}, 250)
 	}
 
 </script>
@@ -25,7 +25,7 @@
 	style={`background-image: url(${data.thumb})`}
 >
 	{#if data.fav}
-		<div class="faved">❤️</div>
+		<div class="faved">💖</div>
 	{/if}
 	<div class="on-hover title">{data.nombre}</div>
 	<div class="on-hover tag">$ {data.precio}</div>
@@ -38,17 +38,15 @@
 >
 	<h4>{data.nombre}</h4>
 	<div class="flex">
-		<img
-			class="img"
-			width="400"
-			src={data.foto}
-			alt={data.nombre}
-			on:click={e => e.target.requestFullscreen()}
-		/>
+		<a href={data.foto} target="_blank">
+			<div  class="img"
+				style={`background-image: url(${data.thumb})`}>
+			</div>
+		</a>
 		<div class="text">
 			<p class="desc">{data.desc}
 				{#if data.link}
-					<br> <a href={data.link} target="_blank">🔗 Más info</a>
+					<br><br> <a href={data.link} target="_blank">🔗 Más info</a>
 				{/if}
 			</p>
 			
@@ -60,7 +58,7 @@
 			<hr />
 			<div class="spaced controls">
 				<button class="fav" on:click={toggleFav}
-					>{data.fav ? "❤️" : "♥"}</button
+					>{data.fav ? "💖" : "❤️"}</button
 				>
 				<button class="done" on:click={(e) => (detail = false)}
 					>👀 Seguir chusm eando</button
@@ -117,9 +115,15 @@
 	.flex {
 		height: 88%;
 	}
+	.flex > * {
+		flex-basis: 50%;
+	}
 	.desc {
 		height: 40%;
 		overflow: auto;
+		font-size: 1.5rem;
+    	line-height: 1.4;
+		white-space: break-spaces;
 	}
 	.fav {
 		background-color: transparent;
@@ -136,8 +140,12 @@
 	}
 
 	.img {
-		height: calc(100vh - 200px);
-		cursor: pointer;
+		height: 100%;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: contain;
+		background-color: var(--color-lightGrey);
+		cursor: zoom-in;
 	}
 	.text {
 		margin-left: 2.5rem;
