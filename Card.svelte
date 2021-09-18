@@ -60,7 +60,7 @@
 			<hr />
 			<div class="spaced controls">
 				<button class="fav" on:click={toggleFav}
-					>{data.fav ? "❤️" : "🤍"}</button
+					>{data.fav ? "❤️" : "♥"}</button
 				>
 				<button class="done" on:click={(e) => (detail = false)}
 					>👀 Seguir chusm eando</button

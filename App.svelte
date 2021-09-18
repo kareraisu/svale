@@ -4,8 +4,9 @@
     import Card from "./Card.svelte"
     import { data } from "./dummyData"
 
+    const DEV = false
+    
     let ENV = {}
-    const DEV = true
     const ALL = "Todo"
     let category = ALL
     let categories = []
@@ -65,7 +66,7 @@ Total: $${total}`
         <h4 class="textc">📋 Instrucciones</h4>
         <ol>
             <li>👀 Chusmeá lo que tenemos <small>(clickeá las fotos)</small></li>
-            <li>🤍 favoriteá lo que te guste</li>
+            <li>♥ favoriteá lo que te guste</li>
             <li>Dale al <span class="button bg-primary">👍 Listo!</span> <small>(abajo a la derecha)</small>
             para mandarnos tu listado por whatsapp o mail y luego poder coordinar la venta</li>
         </ol>
@@ -92,13 +93,13 @@ Total: $${total}`
         <div class="compact textc msg">
             <h1>😅</h1>
             <h4>Aún no favoriteaste nada...</h4>
-            <p>Cuando encuentres algo que te guste, clickeá el 🤍!</p>
+            <p>Cuando encuentres algo que te guste, clickeá el ♥!</p>
             <button class="bg-primary" on:click={(e) => (checkout = 0)}>OK</button>
         </div>
         {/if}
 
         {#if favs.length && checkout == 1}
-            <h3>Estos son tus favoritos ❤️</h3>
+            <h3>Estos son tus favoritos</h3>
             <table>
                 <thead><tr><th>Nombre</th><th>Precio</th></tr></thead>
                 <tbody>
