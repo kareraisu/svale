@@ -94,6 +94,7 @@
 	.thumb .title {
 		color: var(--color-white);
 		font-size: 2.5rem;
+		line-height: 1.2;
 		text-shadow: 0 0 4px black;
 	}
 	.thumb .tag {
@@ -117,6 +118,7 @@
 	}
 	.flex > * {
 		flex-basis: 50%;
+		height: 100%;
 	}
 	.desc {
 		height: 40%;
@@ -169,6 +171,10 @@
 		}
 		.flex {
 			flex-wrap: wrap;
+		}
+		.flex > * {
+			flex-basis: 100%;
+			height: 50%;
 		}
 		.text {
 			margin-left: 0;

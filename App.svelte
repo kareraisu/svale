@@ -1,6 +1,6 @@
 <script>
     import { items } from "./store"
-    import { Modal } from "svelte-chota"
+    import { Button, Modal } from "svelte-chota"
     import Card from "./Card.svelte"
     import { data } from "./dummyData"
 
@@ -150,12 +150,13 @@ Total: $${total}`
     </Modal>
 
     <div class="wrap controls">
-        <div class="hide-phone">Categorias:</div>
         {#each categories as cat}
-            <button
-                class={category == cat ? "bg-primary" : ""}
-                on:click={() => (category = cat)}>{cat}</button
-            >
+            <Button
+                primary={category == cat}
+                outline={category != cat}
+                on:click={() => (category = cat)}>
+                { cat.split(' ')[0] } <span class="hide-phone">{ cat.split(' ')[1] }</span>
+            </Button>
         {/each}
 
         <button class="contact scale bg-primary"
@@ -226,13 +227,10 @@ Total: $${total}`
     }
 
     p.small {
-        font-size: 1.25rem;
+        font-size: 1.3rem;
     }
 
     @media (max-width: 900px) {
-        :global(.modal) {
-            width: 80vw;
-        }
 
         main {
             padding: 2rem;
@@ -245,10 +243,6 @@ Total: $${total}`
     }
 
     @media (max-width: 500px) {
-        :global(.modal) {
-            height: 100vh;
-            width: 100vw;
-        }
 
         main {
             padding: 1rem;
