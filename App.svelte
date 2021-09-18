@@ -70,9 +70,13 @@ Total: $${total}`
             <li>Dale al <span class="button bg-primary">👍 Listo!</span> <small>(abajo a la derecha)</small>
             para mandarnos tu listado por whatsapp o mail y luego poder coordinar la venta</li>
         </ol>
-        <p>
-            Aceptamos efectivo, transferencia o podemos hacerte un link de mercadopago
+        <p class="small">
+            Aceptamos <b>efectivo</b>, <b>transferencia</b> o podemos hacerte un <b>link de mercadopago</b>
             para que puedas usar el medio de pago que prefieras.
+        </p>
+        <p class="small">
+            Los productos se retiran por <b>Villa Urquiza (CABA)</b>, zona Av. Congreso y Av. Constituyentes.
+            También podemos coordinar envío de paquetes no demasiado grandes.
         </p>
 
         <hr>
@@ -94,7 +98,7 @@ Total: $${total}`
             <h1>😅</h1>
             <h4>Aún no favoriteaste nada...</h4>
             <p>Cuando encuentres algo que te guste, clickeá el ❤️!</p>
-            <button class="bg-primary" on:click={(e) => (checkout = 0)}>OK</button>
+            <button class="bg-primary" on:click={() => (checkout = 0)}>OK</button>
         </div>
         {/if}
 
@@ -111,8 +115,8 @@ Total: $${total}`
             </table>
             <div class="spaced controls">
                 <button class="bg-primary"
-                    on:click={(e) => (checkout = 2)}>👌 Perfecto, ya estoy</button>
-                <button on:click={(e) => (checkout = 0)}>👀 Seguir chusmeando</button>
+                    on:click={() => (checkout = 2)}>👌 Perfecto, ya estoy</button>
+                <button on:click={() => (checkout = 0)}>👀 Seguir chusmeando</button>
             </div>
         {/if}
 
@@ -150,12 +154,12 @@ Total: $${total}`
         {#each categories as cat}
             <button
                 class={category == cat ? "bg-primary" : ""}
-                on:click={(e) => (category = cat)}>{cat}</button
+                on:click={() => (category = cat)}>{cat}</button
             >
         {/each}
 
         <button class="contact scale bg-primary"
-            on:click={(e) => (checkout = 1)}
+            on:click={() => (checkout = 1)}
         >👍 Listo!</button>
     </div>
 
@@ -219,6 +223,10 @@ Total: $${total}`
     .compact > h4,
     .compact > p {
         margin: 0;
+    }
+
+    p.small {
+        font-size: 1.25rem;
     }
 
     @media (max-width: 900px) {
