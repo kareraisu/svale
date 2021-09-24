@@ -126,12 +126,15 @@ button:hover {
 .bottom { bottom: 0 }
 .left { left: 0 }
 .right { right: 0 }
+.inline { display: inline-block }
 .flex { display: flex }
 .center { justify-content: center }
 .spaced { justify-content: space-evenly }
 .wrap { flex-wrap: wrap }
 .textc { text-align: center }
 .bold { font-weight: 600 }
+.m0 { margin: 0 }
+.mauto { margin: auto }
 .click { cursor: pointer }
 
 /* responsiveness */

@@ -108,6 +108,7 @@ Total: $${total}`
         {/if}
 
         {#if favs.length && checkout == 1}
+        <div class="textc">
             <h3>Estos son tus favoritos</h3>
             <table>
                 <thead><tr><th>Nombre</th><th>Precio</th></tr></thead>
@@ -123,13 +124,18 @@ Total: $${total}`
                     on:click={() => (checkout = 2)}>👌 Perfecto, ya estoy</button>
                 <button on:click={() => (checkout = 0)}>👀 Seguir chusmeando</button>
             </div>
+        </div>
         {/if}
 
         {#if favs.length && checkout == 2}
+        <div class="textc">
             <h3>Mandanos tu listado!</h3>
-            <p>1. Ingresá tu nombre: <input type="text" bind:value={nombre} /></p>
+            <p>
+                <label for="name">1. Ingresá tu nombre:</label>
+                <input id="name" class="name" bind:value={nombre} />
+            </p>
             {#if nombre}
-                <p>2. Elegí el medio de contacto que prefieras:</p>
+                <p>2. Elegí un medio de contacto:</p>
                 <div class="spaced controls">
                     <a href={waref} class="textc">
                         <img height="100%"
@@ -145,12 +151,13 @@ Total: $${total}`
                     </a>
                 </div>
                 <hr>
-                <div class="compact textc">
+                <div class="compact">
                     <h1>😃</h1>
                     <h3>Gracias por tu tiempo!</h3>
                     <p>Te responderemos a la brevedad</p>
                 </div>
             {/if}
+        </div>
         {/if}
     </Modal>
 
@@ -175,7 +182,7 @@ Total: $${total}`
         {/each}
     </div>
 
-    <p class="bottom fixed small">favicon by <a href="http://www.dariusdan.com" target="_blank" title="Darius Dan">Darius Dan</a></p>
+    <p class="small m0">favicon by <a href="http://www.dariusdan.com" target="_blank" title="Darius Dan">Darius Dan</a></p>
 </main>
 
 <style>
@@ -231,6 +238,12 @@ Total: $${total}`
     .compact > h4,
     .compact > p {
         margin: 0;
+    }
+
+    .name {
+        width: 50% !important;
+        margin: auto;
+        margin-top: 1rem;
     }
 
     @media (max-width: 900px) {
