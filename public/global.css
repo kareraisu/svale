@@ -43,10 +43,15 @@ body {
 }
 
 hr {
-    background-color: var(--color-darkGrey);
+    background-color: var(--color-grey);
     height: 1.5px;
     margin: 2.5rem auto;
     width: 80%;
+}
+
+p.small {
+    font-size: 1.5rem;
+    line-height: 1.4;
 }
 
 button {
@@ -69,6 +74,30 @@ button:hover {
     overflow: auto;
     padding: 2rem 4rem;
 }
+.modal.small {
+    height: auto;
+    width: 30vw;
+}
+
+.slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+.slider > * {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: start;
+    transform: scale(1);
+    transform-origin: center center;
+    transition: transform 0.5s;
+}
+
 
 .scale:hover, .scale:focus {
     transform: scale(1.05);
@@ -91,25 +120,13 @@ button:hover {
 
 /* utility */
 
-.flex {
-    display: flex;
-}
-.center {
-    justify-content: center;
-}
-.spaced {
-    justify-content: space-evenly;
-}
-.wrap {
-    flex-wrap: wrap;
-}
-.textc {
-    text-align: center;
-}
-.bold {
-    font-weight: 600;
-}
-
+.flex { display: flex }
+.center { justify-content: center }
+.spaced { justify-content: space-evenly }
+.wrap { flex-wrap: wrap }
+.textc { text-align: center }
+.bold { font-weight: 600 }
+.click { cursor: pointer }
 
 /* responsiveness */
 
@@ -126,9 +143,6 @@ button:hover {
 @media (max-width: 500px) {
 
     .modal {
-        top: 0 !important;
-        left: 0 !important;
-        transform: none !important;
         height: 100vh;
         width: 100vw;
         padding: 1rem 3rem;

@@ -32,6 +32,9 @@ Total: $${total}`
     $: mailref = `mailto:${ENV.EMAIL}?subject=${encodeURI(`[Super Venta] Listado de ${nombre}`)}&body=${encodeURI(listado)}`
 
     function setData(data) {
+        data = data
+            .filter(el => el.desc && el.fotos)
+            .map(el => ({...el, fotos: el.fotos.trim().split(/\n/).map(f => f.split(' '))}))
         categories = [ALL, ...new Set(data.map((e) => e.categoria))]
         items.set(data)
     }
@@ -41,7 +44,7 @@ Total: $${total}`
         if (res.ok)
             try {
                 const data = await res.json()
-                setData(data.products.filter(el => el.desc && el.foto))
+                setData(data.products)
             } catch (err) {}
     }
 
@@ -54,7 +57,6 @@ Total: $${total}`
         bind:open={welcome}
         on:keydown={e =>['Escape'].includes(e.key) && (welcome = false)}
     >
-        <h2 class="textc">🎊 Super Venta de Ale y Caro 🎉</h2>
         <h4 class="textc">Hola! 👋</h4>
         <p>
             Estamos haciendo limpieza y tenemos varias cosas
@@ -70,13 +72,16 @@ Total: $${total}`
             <li>Dale al <span class="button bg-primary">👍 Listo!</span> <small>(abajo a la derecha)</small>
             para mandarnos tu listado por whatsapp o mail y luego poder coordinar la venta</li>
         </ol>
+
+        <hr>
+
         <p class="small">
             Aceptamos <b>efectivo</b>, <b>transferencia</b> o podemos hacerte un <b>link de mercadopago</b>
             para que puedas usar el medio de pago que prefieras.
         </p>
         <p class="small">
             Los productos se retiran por <b>Villa Urquiza (CABA)</b>, zona Av. Congreso y Av. Constituyentes.
-            También podemos coordinar envío de paquetes no demasiado grandes.
+            Podemos coordinar envío de paquetes no demasiado grandes.
         </p>
 
         <hr>
@@ -224,10 +229,6 @@ Total: $${total}`
     .compact > h4,
     .compact > p {
         margin: 0;
-    }
-
-    p.small {
-        font-size: 1.3rem;
     }
 
     @media (max-width: 900px) {

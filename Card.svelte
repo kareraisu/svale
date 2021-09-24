@@ -1,10 +1,11 @@
 <script>
 	import { items } from "./store"
-	import { Modal } from "svelte-chota"
+	import { Button, Modal, Icon } from "svelte-chota"
 
 	export let data
 
 	let detail = false
+	let tip = false
 
 	const toggleFav = (e) => {
 		data.fav = !data.fav
@@ -17,12 +18,13 @@
 
 </script>
 
+
 <div
 	tabindex="0"
 	class="thumb card scale"
 	on:click={(e) => (detail = true)}
 	on:keydown={(e) => ["Enter", "Space"].includes(e.key) && (detail = true)}
-	style={`background-image: url(${data.thumb})`}
+	style={`background-image: url(${data.fotos[0][1]})`}
 >
 	{#if data.fav}
 		<div class="faved">💖</div>
@@ -38,13 +40,17 @@
 >
 	<h4>{data.nombre}</h4>
 	<div class="flex">
-		<a href={data.foto} target="_blank">
-			<div  class="img"
-				style={`background-image: url(${data.thumb})`}>
-			</div>
-		</a>
+		<div class="slider">
+			{#each data.fotos as foto}
+				<a href={foto[0]}
+					target="_blank"
+					class="img"
+					style={`background-image: url(${foto[1]})`}
+				> </a>
+			{/each}
+		</div>
 		<div class="text">
-			<p class="desc">{data.desc}
+			<p class="small desc">{data.desc}
 				{#if data.link}
 					<br><br> <a href={data.link} target="_blank">🔗 Más info</a>
 				{/if}
@@ -52,7 +58,14 @@
 			
 			<hr />
 			<div style="text-align: center">
-				<div class="tag">{data.estado}</div>
+				<div class="tag">
+					{data.estado}
+				</div>
+				<Icon on:click={() => tip = true}
+					src='https://icongr.am/clarity/help.svg'
+					size='2rem'
+					class='click'
+				/>
 				<div class="price">$ {data.precio}</div>
 			</div>
 			<hr />
@@ -67,6 +80,23 @@
 		</div>
 	</div>
 </Modal>
+
+<Modal
+	class="small card modal"
+	bind:open={tip}
+	on:keydown={(e) => ["Escape"].includes(e.key) && (tip = false)}
+>
+	<h4 class="textc">Estado de los productos</h4>
+	<p class="small" style="line-height: 2.5;">
+		<span class="tag">Nuevo</span> : casi sin uso, perfecto estado <br>
+		<span class="tag">Como nuevo</span> : usado, perfecto estado <br>
+		<span class="tag">Usado</span> : usado, con signos de uso
+	</p>
+	<div class="textc">
+		<Button primary on:click={(e) => (tip = false)}>OK</Button>
+	</div>
+</Modal>
+
 
 <style>
 	.thumb {
@@ -116,15 +146,16 @@
 	.flex {
 		height: 88%;
 	}
-	.flex > * {
-		flex-basis: 50%;
-		height: 100%;
+	.slider {
+		flex-basis: 70%;
+	}
+
+	.text {
+		flex-basis: 30%;
 	}
 	.desc {
 		height: 40%;
 		overflow: auto;
-		font-size: 1.5rem;
-    	line-height: 1.4;
 		white-space: break-spaces;
 	}
 	.fav {
@@ -143,6 +174,7 @@
 
 	.img {
 		height: 100%;
+		width: 100%;
 		background-position: center;
 		background-repeat: no-repeat;
 		background-size: contain;
@@ -153,7 +185,7 @@
 		margin-left: 2.5rem;
 	}
 	.price {
-		font-size: 2.5rem;
+		font-size: 3rem;
 	}
 
 	.on-hover {
