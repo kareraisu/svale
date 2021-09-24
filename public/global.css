@@ -120,6 +120,12 @@ button:hover {
 
 /* utility */
 
+.abs { position: absolute }
+.fixed { position: fixed }
+.top { top: 0 }
+.bottom { bottom: 0 }
+.left { left: 0 }
+.right { right: 0 }
 .flex { display: flex }
 .center { justify-content: center }
 .spaced { justify-content: space-evenly }

@@ -174,6 +174,8 @@ Total: $${total}`
             <Card data={d}/>
         {/each}
     </div>
+
+    <p class="bottom fixed small">favicon by <a href="http://www.dariusdan.com" target="_blank" title="Darius Dan">Darius Dan</a></p>
 </main>
 
 <style>
