@@ -1,31 +1,32 @@
 @import "https://unpkg.com/chota@latest";
 
 :root {
-    --bg-color: #222;
-    --bg-secondary-color: #f3f3f6;
-    --bg-gradient: linear-gradient(129deg, rgba(0,194,212,1) 0%, rgba(0,255,174,1) 100%);
-    --color-white: #fff;
+    --color-black: #020202;
+    --color-white: #fefefe;
+    --color-lightGrey: #999;
+    --color-grey: #666;
+    --color-darkGrey: #0c1117;
     --color-primary: rgba(0,189,125,1);
-    --color-lightGrey: #d2d6dd;
-    --color-grey: #747681;
-    --color-darkGrey: #3f4144;
     --color-error: #d43939;
     --color-success: #28bd14;
     --grid-maxWidth: 120rem;
     --grid-gutter: 2rem;
     --font-size: 1.8rem;
-    --font-color: #333333;
+    --font-color: var(--color-white);
     --font-family-sans: sans-serif;
     --font-family-mono: monaco, "Consolas", "Lucida Console", monospace;
+    --bg-color: var(--color-darkGrey);
+    --bg-secondary-color: #f3f3f6;
     font-size: 11px;
 }
 
 ::-webkit-scrollbar {
-    width: 12px;
+    width: 11px;
+    height: 11px;
 }
 ::-webkit-scrollbar-track {
     box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
-    border-radius: 10px;
+    border-radius: 11px;
 }
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
@@ -36,10 +37,8 @@
 body {
     width: 100vw;
     min-height: 100vh;
-    background: rgb(238,174,202);
-    background: var(--bg-gradient);
-    background-repeat: no-repeat;
     overflow-x: hidden;
+    background: var(--bg-color);
 }
 
 hr {
@@ -54,28 +53,45 @@ p.small {
     line-height: 1.4;
 }
 
-button {
-    margin: 0.5rem;
-}
 button:hover {
     opacity: 1;
     filter: contrast(1.2);
 }
-.button.primary, .button.secondary, .button.success, [type=submit] {
-    color: var(--font-color);
+button,
+.button,
+[type=submit] {
+    color: var(--font-color) !important;
 }
 .button.outline {
-    border-color: var(--font-color);
+    border-color: var(--font-color) !important;
+}
+
+input {
+    width: 100px !important;
+    color: var(--font-color);
+    background: transparent;
+    border: 0 !important;
+    border-bottom: 1px solid var(--font-color) !important;
+    border-radius: 0 !important;
+    text-align: center;
+}
+input:focus {
+    width: 150px !important;
+    border-width: 2px;
+    box-shadow: none !important;
 }
 
 .modal {
     height: 90vh;
     width: 50vw;
     overflow: auto;
-    padding: 2rem 4rem;
+    padding: 4rem;
+    padding-top: 2rem;
+    background-color: var(--bg-color) !important;
 }
 .modal.small {
     height: auto;
+    min-height: ;
     width: 30vw;
 }
 
@@ -99,27 +115,34 @@ button:hover {
 }
 
 
-.scale:hover, .scale:focus {
+.scale:hover,
+.scale:focus {
     transform: scale(1.05);
 }
 
 .controls {
     display: flex;
     align-items: center;
-    margin: 20px 0;
+    margin: 1rem 0;
 }
-.controls > button, .controls > a {
+.controls > button,
+.controls > a {
     min-height: 50px;
     text-align: center;
     color: var(--font-color);
 }
-.controls > button:hover, .controls > a:hover {
+.controls > button:hover,
+.controls > a:hover {
     transform: scale(1.1);
+}
+.controls img {
+    height: 60px;
 }
 
 
 /* utility */
 
+.rel { position: relative }
 .abs { position: absolute }
 .fixed { position: fixed }
 .top { top: 0 }

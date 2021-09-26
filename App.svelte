@@ -7,6 +7,9 @@
     const DEV = false
 
     let ENV = {}
+    const thepass = 'alohomora'
+    let pass = location.hash.substr(1)
+    let darkTheme = true
     const ALL = "🌌 Todo"
     let category = ALL
     let categories = []
@@ -14,6 +17,7 @@
     let checkout = 0
     let nombre = ""
 
+    $: valid = pass === thepass
     $: filtered =
         category == ALL
             ? $items
@@ -48,11 +52,61 @@ Total: $${total}`
             } catch (err) {}
     }
 
+    function toggleTheme() {
+        const light = {
+            'bg-color': 'color-white',
+            'font-color': 'color-black',
+        }
+        const dark = {
+            'bg-color': 'color-darkGrey',
+            'font-color': 'color-white',
+        }
+        darkTheme = !darkTheme
+        const theme = darkTheme ? dark : light
+        for (let prop of Object.keys(theme)) {
+            document.documentElement.style.setProperty('--' + prop, `var(--${theme[prop]})`)
+        }
+    }
+
     DEV ? setData(data) : fetchData()
 
 </script>
 
-<main>
+
+
+{#if !valid}
+    <div class="gate">
+        <img src="gate.jpg" alt="Puertas de Moria">
+        <h3>Habla, amigo, y entra</h3>
+        <input bind:value={pass}>
+    </div>
+{:else}
+<main class="rel">
+    <div class="flex wrap">
+        {#each categories as cat}
+            <Button
+                primary={category == cat}
+                outline={category != cat}
+                on:click={() => (category = cat)}>
+                { cat.split(' ')[0] } <span class="hide-phone">{ cat.split(' ')[1] }</span>
+            </Button>
+        {/each}
+
+        <div class="abs right click theme" on:click={toggleTheme}>{ darkTheme ? '☀️' : '🌑' }</div>
+
+        <button class="button contact scale bg-primary"
+            on:click={() => (checkout = 1)}
+        >👍 Listo!</button>
+    </div>
+
+    <div class="content">
+        {#each filtered as d}
+            <Card data={d}/>
+        {/each}
+    </div>
+
+    <p class="abs bottom small m0">favicon by <a href="http://www.dariusdan.com" target="_blank" title="Darius Dan">Darius Dan</a></p>
+
     <Modal class="card modal"
         bind:open={welcome}
         on:keydown={e =>['Escape'].includes(e.key) && (welcome = false)}
@@ -88,13 +142,13 @@ Total: $${total}`
 
         <p class="textc">Esperamos que encuentres algo de tu agrado! 😊</p>
         <div class="spaced controls">
-            <button class="bg-primary"
+            <Button primary
                 tabindex="0"
-                on:click={(e) => (welcome = false)}>👀 A chusmear!</button>
+                on:click={(e) => (welcome = false)}>👀 A chusmear!</Button>
         </div>
     </Modal>
 
-    <Modal class="card modal"
+    <Modal class="small card modal"
         bind:open={checkout}
         on:keydown={e =>['Escape'].includes(e.key) && (checkout = 0)}
     >
@@ -160,59 +214,43 @@ Total: $${total}`
         </div>
         {/if}
     </Modal>
-
-    <div class="wrap controls">
-        {#each categories as cat}
-            <Button
-                primary={category == cat}
-                outline={category != cat}
-                on:click={() => (category = cat)}>
-                { cat.split(' ')[0] } <span class="hide-phone">{ cat.split(' ')[1] }</span>
-            </Button>
-        {/each}
-
-        <button class="contact scale bg-primary"
-            on:click={() => (checkout = 1)}
-        >👍 Listo!</button>
-    </div>
-
-    <div class="content">
-        {#each filtered as d}
-            <Card data={d}/>
-        {/each}
-    </div>
-
-    <p class="small m0">favicon by <a href="http://www.dariusdan.com" target="_blank" title="Darius Dan">Darius Dan</a></p>
 </main>
+{/if}
+
 
 <style>
 
+    .gate {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
     main {
-        padding: 4rem;
-        padding-top: 0 !important;
+        padding: 2rem 4rem 5rem 4rem;
+        min-height: 100vh;
     }
 
     .content {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
         grid-gap: 2rem;
+        margin-top: 2rem;
     }
 
     .contact {
         position: fixed;
         bottom: 0;
         right: 0;
+        margin: 2rem;
         z-index: 1;
     }
 
-    .msg {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 20rem;
-        margin: auto;
+    .theme {
+        margin-right: 4rem;
+        font-size: 3rem;
     }
 
     table {
@@ -249,7 +287,7 @@ Total: $${total}`
     @media (max-width: 900px) {
 
         main {
-            padding: 2rem;
+            padding: 2rem 2rem 4rem 2rem;
         }
 
         .content {
@@ -261,7 +299,7 @@ Total: $${total}`
     @media (max-width: 500px) {
 
         main {
-            padding: 1rem;
+            padding: 1rem 1rem 3rem 1rem;
         }
 
         .content {

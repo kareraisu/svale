@@ -73,7 +73,7 @@
 				<button class="fav" on:click={toggleFav}
 					>{data.fav ? "💖" : "❤️"}</button
 				>
-				<button class="done" on:click={(e) => (detail = false)}
+				<button on:click={(e) => (detail = false)}
 					>👀 Seguir chusm eando</button
 				>
 			</div>
@@ -158,13 +158,12 @@
 		overflow: auto;
 		white-space: break-spaces;
 	}
+	.controls > button {
+		width: 120px;
+	}
 	.fav {
 		background-color: transparent;
 		font-size: 3rem;
-	}
-	.fav,
-	.done {
-		width: 120px;
 	}
 	.faved {
 		position: absolute;
@@ -178,7 +177,7 @@
 		background-position: center;
 		background-repeat: no-repeat;
 		background-size: contain;
-		background-color: var(--color-lightGrey);
+		background-color: var(--bg-color);
 		cursor: zoom-in;
 	}
 	.text {
