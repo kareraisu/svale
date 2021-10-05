@@ -1,7 +1,6 @@
 <script>
-    import { items } from "./store"
-    import { Button, Modal } from "svelte-chota"
-    import Card from "./Card.svelte"
+    import { items, modals } from "./store"
+    import { Button, Modal, Icon } from "svelte-chota"
     import { data } from "./dummyData"
 
     const DEV = false
@@ -13,11 +12,15 @@
     const ALL = "🌌 Todo"
     let category = ALL
     let categories = []
-    let welcome = true
-    let checkout = 0
+    let currentItem = {}
     let nombre = ""
+    $modals.welcome = true
+    $modals.detail = false
+	$modals.tip = false
+    $modals.checkout = 0
 
-    $: valid = pass === thepass
+    $: valid = pass && (pass.toLowerCase() === thepass)
+    $: valid && (DEV ? setData(data) : fetchData())
     $: filtered =
         category == ALL
             ? $items
@@ -34,8 +37,10 @@ Total: $${total}`
 
     $: waref = `https://wa.me/${ENV.WA_NUMBER}?text=${encodeURI(listado)}`
     $: mailref = `mailto:${ENV.EMAIL}?subject=${encodeURI(`[Super Venta] Listado de ${nombre}`)}&body=${encodeURI(listado)}`
+    $: $modals.detail = currentItem.nombre
 
     function setData(data) {
+        console.log('loading product data')
         data = data
             .filter(el => el.desc && el.fotos)
             .map(el => ({...el, fotos: el.fotos.trim().split(/\n/).map(f => f.split(' '))}))
@@ -68,7 +73,25 @@ Total: $${total}`
         }
     }
 
-    DEV ? setData(data) : fetchData()
+	function toggleFav(e) {
+		currentItem.fav = !currentItem.fav
+		const i = $items.findIndex((e) => e.nombre == currentItem.nombre)
+		$items[i] = currentItem
+		setTimeout(() => {
+			$modals.detail = false
+		}, 250)
+	}
+
+    window.addEventListener('popstate', function() {
+        const openModals = Object.values($modals).some(v => v)
+            
+        if (openModals) {
+            // close all modals
+            $modals = Object.fromEntries( Object.entries($modals).map(([k]) => [k,false]) )
+            // deactivate back navigation
+            history.pushState(null, document.title, location.href)
+        }
+    })
 
 </script>
 
@@ -77,12 +100,12 @@ Total: $${total}`
 {#if !valid}
     <div class="gate">
         <img src="gate.jpg" alt="Puertas de Moria">
-        <h3>Habla, amigo, y entra</h3>
+        <h3>Escribe, amigo, y entra</h3>
         <input bind:value={pass}>
     </div>
 {:else}
 <main class="rel">
-    <div class="flex wrap">
+    <div class="categories flex wrap">
         {#each categories as cat}
             <Button
                 primary={category == cat}
@@ -92,24 +115,104 @@ Total: $${total}`
             </Button>
         {/each}
 
-        <div class="abs right click theme" on:click={toggleTheme}>{ darkTheme ? '☀️' : '🌑' }</div>
+        <div class="abs click theme" on:click={toggleTheme}>{ darkTheme ? '☀️' : '🌑' }</div>
 
         <button class="button contact scale bg-primary"
-            on:click={() => (checkout = 1)}
+            on:click={() => ($modals.checkout = 1)}
         >👍 Listo!</button>
     </div>
 
     <div class="content">
-        {#each filtered as d}
-            <Card data={d}/>
+        {#each filtered as item}
+        <div
+            tabindex="0"
+            class="thumb card scale"
+            on:click={(e) => (currentItem = item)}
+            on:keydown={(e) => ["Enter", "Space"].includes(e.key) && (currentItem = item)}
+            style={`background-image: url(${item.fotos[0][1]})`}
+        >
+            {#if item.fav}
+                <div class="faved">💖</div>
+            {/if}
+            <div class="on-hover title">{item.nombre}</div>
+            <div class="on-hover tag">$ {item.precio}</div>
+        </div>
         {/each}
     </div>
 
     <p class="abs bottom small m0">favicon by <a href="http://www.dariusdan.com" target="_blank" title="Darius Dan">Darius Dan</a></p>
 
+    <Modal
+        class="card modal"
+        bind:open={$modals.detail}
+        on:keydown={(e) => ["Escape"].includes(e.key) && ($modals.detail = false)}
+    >
+        <h4>{currentItem.nombre}</h4>
+        <div class="flex detail">
+            <div class="slider">
+                {#each currentItem.fotos as foto}
+                    <a href={foto[0]}
+                        target="_blank"
+                        class="img"
+                        style={`background-image: url(${foto[1]})`}
+                    > </a>
+                {/each}
+            </div>
+            <div class="text">
+                <p class="small desc">{currentItem.desc}
+                    {#if currentItem.link}
+                        <br><br> <a href={currentItem.link} target="_blank">🔗 Más info</a>
+                    {/if}
+                </p>
+                
+                <hr />
+                <div style="text-align: center">
+                    <div class="tag">
+                        {currentItem.estado}
+                    </div>
+                    <Icon on:click={() => $modals.tip = true}
+                        src='https://icongr.am/clarity/help.svg'
+                        size='2rem'
+                        class='click'
+                    />
+                    <div class="price">$ {currentItem.precio}</div>
+                </div>
+                <hr />
+                <div class="spaced controls">
+                    <button class="button outline"
+                        on:click={(e) => ($modals.detail = false)}
+                    >
+                        👀 Seguir chusmeando
+                    </button>
+                    <button class="bg-primary fav"
+                        on:click={toggleFav}
+                    >
+                        {currentItem.fav ? "💖" : "❤️"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Modal>
+
+    <Modal
+        class="small card modal"
+        bind:open={$modals.tip}
+        on:keydown={(e) => ["Escape"].includes(e.key) && ($modals.tip = false)}
+    >
+        <h4 class="textc">Estado de los productos</h4>
+        <p class="small" style="line-height: 2.5;">
+            <span class="tag">Nuevo</span> : casi sin uso, perfecto estado <br>
+            <span class="tag">Como nuevo</span> : usado, perfecto estado <br>
+            <span class="tag">Usado</span> : usado, con signos de uso
+        </p>
+        <div class="textc">
+            <Button primary on:click={(e) => ($modals.tip = false)}>OK</Button>
+        </div>
+    </Modal>
+
     <Modal class="card modal"
-        bind:open={welcome}
-        on:keydown={e =>['Escape'].includes(e.key) && (welcome = false)}
+        bind:open={$modals.welcome}
+        on:keydown={e =>['Escape'].includes(e.key) && ($modals.welcome = false)}
     >
         <h4 class="textc">Hola! 👋</h4>
         <p>
@@ -144,24 +247,27 @@ Total: $${total}`
         <div class="spaced controls">
             <Button primary
                 tabindex="0"
-                on:click={(e) => (welcome = false)}>👀 A chusmear!</Button>
+                on:click={(e) => ($modals.welcome = false)}>👀 A chusmear!</Button>
         </div>
     </Modal>
 
     <Modal class="small card modal"
-        bind:open={checkout}
-        on:keydown={e =>['Escape'].includes(e.key) && (checkout = 0)}
+        bind:open={$modals.checkout}
+        on:keydown={e =>['Escape'].includes(e.key) && ($modals.checkout = 0)}
     >
         {#if !favs.length}
-        <div class="compact textc msg">
+        <div class="compact textc">
             <h1>😅</h1>
             <h4>Aún no favoriteaste nada...</h4>
             <p>Cuando encuentres algo que te guste, clickeá el ❤️!</p>
-            <button class="bg-primary" on:click={() => (checkout = 0)}>OK</button>
+            <button class="bg-primary"
+                style="margin-top: 2rem;"
+                on:click={() => ($modals.checkout = 0)}
+            >OK</button>
         </div>
         {/if}
 
-        {#if favs.length && checkout == 1}
+        {#if favs.length && $modals.checkout == 1}
         <div class="textc">
             <h3>Estos son tus favoritos</h3>
             <table>
@@ -174,14 +280,17 @@ Total: $${total}`
                 <tfoot><tr class="bold"><td>Total:</td><td>$ {total}</td></tr></tfoot>
             </table>
             <div class="spaced controls">
+                <button class="button outline"
+                    on:click={() => ($modals.checkout = 0)}
+                >👀 Seguir chusmeando</button>
                 <button class="bg-primary"
-                    on:click={() => (checkout = 2)}>👌 Perfecto, ya estoy</button>
-                <button on:click={() => (checkout = 0)}>👀 Seguir chusmeando</button>
+                    on:click={() => ($modals.checkout = 2)}
+                >👌 Perfecto, ya estoy</button>
             </div>
         </div>
         {/if}
 
-        {#if favs.length && checkout == 2}
+        {#if favs.length && $modals.checkout == 2}
         <div class="textc">
             <h3>Mandanos tu listado!</h3>
             <p>
@@ -236,25 +345,26 @@ Total: $${total}`
     .content {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-        grid-gap: 2rem;
-        margin-top: 2rem;
+        grid-gap: var(--space);
+        margin-top: var(--space);
     }
 
     .contact {
         position: fixed;
         bottom: 0;
         right: 0;
-        margin: 2rem;
+        margin: var(--space);
         z-index: 1;
+        font-size: 2rem;
     }
 
     .theme {
-        margin-right: 4rem;
+        right: var(--d-space);
         font-size: 3rem;
     }
 
     table {
-        margin-bottom: 1rem;
+        margin-bottom: var(--h-space);
     }
     thead,
     tbody,
@@ -284,6 +394,85 @@ Total: $${total}`
         margin-top: 1rem;
     }
 
+    .thumb {
+		position: relative;
+		height: 20rem;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+	}
+	.thumb .title {
+		color: var(--color-white);
+		font-size: calc(var(--font-size) * 1.2);
+		line-height: 1.2;
+		text-shadow: 0 0 4px black;
+	}
+	.thumb .tag {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		margin: var(--space);
+		color: var(--color-white);
+		background: var(--color-primary);
+		text-shadow: 0 0 4px black;
+		box-shadow: 0 0 4px black;
+	}
+
+	.card {
+		position: relative;
+		cursor: pointer;
+		transition: transform 0.2s;
+	}
+	.slider {
+		flex-basis: 70%;
+	}
+
+	.text {
+		flex-basis: 30%;
+	}
+	.desc {
+		height: 40%;
+		overflow: auto;
+		white-space: break-spaces;
+	}
+	.controls > button {
+        height: 80px;
+		width: 140px;
+        padding: 1rem 1.5rem;
+	}
+	.fav {
+		background-color: transparent;
+		font-size: 3rem;
+	}
+	.faved {
+		position: absolute;
+		right: 1.5rem;
+		font-size: 2.5rem;
+	}
+
+	.img {
+		width: 100%;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+		background-color: var(--bg-color);
+		cursor: zoom-in;
+	}
+	.text {
+		margin-left: 2.5rem;
+	}
+	.price {
+		font-size: 3rem;
+	}
+
+	.on-hover {
+		opacity: 0;
+		transition: opacity 0.2s;
+	}
+	*:hover > .on-hover,
+	*:focus > .on-hover {
+		opacity: 1;
+	}
     @media (max-width: 900px) {
 
         main {
@@ -292,7 +481,6 @@ Total: $${total}`
 
         .content {
             grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-            grid-gap: 1.5rem;
         }
     }
 
@@ -304,12 +492,35 @@ Total: $${total}`
 
         .content {
             grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-            grid-gap: 1rem;
+        }
+
+        .theme {
+            position: fixed;
+            bottom: 0;
+            left: var(--space);
+            right: initial;
+            z-index: 1;
         }
 
         .hide-phone {
             display: none;
         }
+
+        .thumb {
+			height: 10rem;
+		}
+		.flex {
+			flex-wrap: wrap;
+		}   
+		.detail > * {
+			flex-basis: 100%;
+			height: 50%;
+            min-height: 200px;
+		}
+		.text {
+			margin-left: 0;
+			margin-top: var(--space);
+		}
     }
 
 </style>

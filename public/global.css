@@ -17,6 +17,9 @@
     --font-family-mono: monaco, "Consolas", "Lucida Console", monospace;
     --bg-color: var(--color-darkGrey);
     --bg-secondary-color: #f3f3f6;
+    --space: 2rem;
+    --h-space: calc(var(--space) / 2);
+    --d-space: calc(var(--space) * 2);
     font-size: 11px;
 }
 
@@ -44,12 +47,12 @@ body {
 hr {
     background-color: var(--color-grey);
     height: 1.5px;
-    margin: 2.5rem auto;
+    margin: var(--d-space) auto;
     width: 80%;
 }
 
 p.small {
-    font-size: 1.5rem;
+    font-size: calc(var(--font-size) * 0.8);
     line-height: 1.4;
 }
 
@@ -85,13 +88,13 @@ input:focus {
     height: 90vh;
     width: 50vw;
     overflow: auto;
-    padding: 4rem;
-    padding-top: 2rem;
+    padding: var(--d-space);
+    padding-top: var(--space);
     background-color: var(--bg-color) !important;
 }
 .modal.small {
     height: auto;
-    min-height: ;
+    min-height: auto;
     width: 30vw;
 }
 
@@ -123,7 +126,7 @@ input:focus {
 .controls {
     display: flex;
     align-items: center;
-    margin: 1rem 0;
+    margin: var(--h-space) 0;
 }
 .controls > button,
 .controls > a {
@@ -133,7 +136,7 @@ input:focus {
 }
 .controls > button:hover,
 .controls > a:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 .controls img {
     height: 60px;
@@ -165,6 +168,10 @@ input:focus {
 
 @media (max-width: 900px) {
 
+    :root {
+        --space: 1.5rem;
+    }
+
     .modal {
         width: 80vw;
     }
@@ -174,10 +181,32 @@ input:focus {
 
 @media (max-width: 500px) {
 
+    :root {
+        --space: 1rem;
+        --font-size: 1.5rem;
+    }
+
+    .flex.wrap .button+.button {
+        margin-left: 0;
+    }
+
     .modal {
-        height: 100vh;
-        width: 100vw;
-        padding: 1rem 3rem;
+        top: 0px !important;
+        left: 0px !important;
+        min-height: 100vh !important;
+        width: 100vw !important;
+        min-width: 100vw !important;
+        transform: none !important;
+    }
+    .modal.small {
+        bottom: 0;
+        top: initial !important;
+        min-height: auto !important;
+    }
+
+    .categories button {
+        font-size: calc(var(--font-size) * 1.5);
+        padding: 0.8rem 1rem;
     }
 
 }
