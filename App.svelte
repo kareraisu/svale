@@ -265,9 +265,9 @@ Total: $${total}`
                 on:click={() => ($modals.checkout = 0)}
             >OK</button>
         </div>
-        {/if}
+        {:else}
 
-        {#if favs.length && $modals.checkout == 1}
+        {#if $modals.checkout == 1}
         <div class="textc">
             <h3>Estos son tus favoritos</h3>
             <table>
@@ -290,37 +290,54 @@ Total: $${total}`
         </div>
         {/if}
 
-        {#if favs.length && $modals.checkout == 2}
+        {#if $modals.checkout == 2}
         <div class="textc">
             <h3>Mandanos tu listado!</h3>
             <p>
                 <label for="name">1. Ingresá tu nombre:</label>
-                <input id="name" class="name" bind:value={nombre} />
+                <input id="name" class="name"
+                    bind:value={nombre}
+                    on:keydown={ev => (ev.key == 'Enter') && (nombre.length >= 3) && ($modals.checkout = 3)}
+                />
+                <button
+                    class={nombre.length >= 3 ? 'bg-primary' : ''}
+                    disabled={nombre.length < 3}
+                    on:click={() => $modals.checkout = 3}
+                >OK</button>
             </p>
-            {#if nombre}
-                <p>2. Elegí un medio de contacto:</p>
-                <div class="spaced controls">
-                    <a href={waref} class="textc">
-                        <img height="100%"
-                            src="https://image.flaticon.com/icons/png/128/1384/1384055.png"
-                            alt="Whatsapp">
-                        <div>Whatsapp</div>
-                    </a>
-                    <a href={mailref} class="textc">
-                        <img height="100%"
-                            src="https://image.flaticon.com/icons/png/128/893/893257.png"
-                            alt="Email">
-                        <div>Email</div>
-                    </a>
-                </div>
-                <hr>
-                <div class="compact">
-                    <h1>😃</h1>
-                    <h3>Gracias por tu tiempo!</h3>
-                    <p>Te responderemos a la brevedad</p>
-                </div>
-            {/if}
         </div>
+        {/if}
+
+        {#if $modals.checkout == 3}
+        <div class="textc">
+            <h3>Mandanos tu listado!</h3>
+            <p>2. Elegí un medio de contacto:</p>
+            <div class="spaced controls">
+                <a href={waref} class="textc"
+                    on:click={() => $modals.checkout = 4}>
+                    <img height="100%"
+                        src="https://image.flaticon.com/icons/png/128/1384/1384055.png"
+                        alt="Whatsapp">
+                    <div>Whatsapp</div>
+                </a>
+                <a href={mailref} class="textc"
+                    on:click={() => $modals.checkout = 4}>
+                    <img height="100%"
+                        src="https://image.flaticon.com/icons/png/128/893/893257.png"
+                        alt="Email">
+                    <div>Email</div>
+                </a>
+            </div>
+        </div>
+        {/if}
+
+        {#if $modals.checkout == 4}
+        <div class="textc compact">
+            <h1>😃</h1>
+            <h3>Gracias por tu tiempo!</h3>
+            <p>Te responderemos a la brevedad</p>
+        </div>
+        {/if}
         {/if}
     </Modal>
 </main>
@@ -391,7 +408,7 @@ Total: $${total}`
     .name {
         width: 50% !important;
         margin: auto;
-        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
 
     .thumb {
@@ -423,6 +440,11 @@ Total: $${total}`
 		cursor: pointer;
 		transition: transform 0.2s;
 	}
+
+    .detail {
+        height: 88%;
+    }
+
 	.slider {
 		flex-basis: 70%;
 	}
@@ -511,7 +533,10 @@ Total: $${total}`
 		}
 		.flex {
 			flex-wrap: wrap;
-		}   
+		}
+        .detail {
+            height: auto;
+        }
 		.detail > * {
 			flex-basis: 100%;
 			height: 50%;
