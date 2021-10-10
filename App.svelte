@@ -42,7 +42,7 @@ Total: $${total}`
     function setData(data) {
         console.log('loading product data')
         data = data
-            .filter(el => el.desc && el.fotos)
+            .filter(el => el.desc && el.fotos && el.precio)
             .map(el => ({...el, fotos: el.fotos.trim().split(/\n/).map(f => f.split(' '))}))
         categories = [ALL, ...new Set(data.map((e) => e.categoria))]
         items.set(data)
@@ -355,8 +355,10 @@ Total: $${total}`
     }
 
     main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
         padding: 2rem 4rem 5rem 4rem;
-        min-height: 100vh;
     }
 
     .content {
@@ -364,6 +366,8 @@ Total: $${total}`
         grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
         grid-gap: var(--space);
         margin-top: var(--space);
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
     .contact {
