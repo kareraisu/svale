@@ -1,26 +1,26 @@
 <script>
     import { items, modals } from "./store"
     import { Button, Modal, Icon } from "svelte-chota"
-    import { data } from "./dummyData"
-
-    const DEV = false
 
     let ENV = {}
+    const API = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTnow5FsrJH_liAk7Pw6JjjLxAGAibMSeM7wmA17eNcbjYUOIPpkW_MjD0SjhTrxLzGtAPN-cTcpPjC/pub?gid=0&single=true&output=tsv'
     const thepass = 'alohomora'
     let pass = location.hash.substr(1)
     let darkTheme = true
     const ALL = "🌌 Todo"
     let category = ALL
     let categories = []
+    let itemProps = []
     let currentItem = {}
     let nombre = ""
+
     $modals.welcome = true
     $modals.detail = false
 	$modals.tip = false
     $modals.checkout = 0
 
     $: valid = pass && (pass.toLowerCase() === thepass)
-    $: valid && (DEV ? setData(data) : fetchData())
+    $: valid && fetchData()
     $: filtered =
         category == ALL
             ? $items
@@ -40,21 +40,36 @@ Total: $${total}`
     $: $modals.detail = currentItem.nombre
 
     function setData(data) {
-        console.log('loading product data')
+        data = data.split(/\r\n/).map(row => row.split(/\t/))
+        itemProps = data.shift()
         data = data
-            .filter(el => el.desc && el.fotos && el.precio)
-            .map(el => ({...el, fotos: el.fotos.trim().split(/\n/).map(f => f.split(' '))}))
+            .map(createItem)
+            .filter(el => el.desc && el.fotos && el.precio && !el.interesade)
+            console.log('Loaded product data:', data)
         categories = [ALL, ...new Set(data.map((e) => e.categoria))]
         items.set(data)
     }
 
+    function createItem(data) {
+        const item = Object.fromEntries( zip(itemProps, data) )
+        item.fotos = item.fotos && item.fotos.trim().split(', ').map(f => f.split(' '))
+        return item
+    }
+
+    function zip(...arrays) {
+        const length = Math.min(...arrays.map(arr => arr.length))
+        return Array.from({ length }, (_, index) => arrays.map((array => array[index])))
+    }
+
     async function fetchData() {
-        const res = await fetch(ENV.API)
+        const res = await fetch(API)
         if (res.ok)
             try {
-                const data = await res.json()
-                setData(data.products)
-            } catch (err) {}
+                const data = await res.text()
+                setData(data)
+            } catch (err) {
+                console.error('Failed to fetch data')
+            }
     }
 
     function toggleTheme() {
