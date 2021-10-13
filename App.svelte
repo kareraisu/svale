@@ -27,7 +27,7 @@
             : $items.filter((e) => e.categoria === category)
     $: favs = $items.filter((e) => e.fav)
     $: total = favs
-        .map((e) => (typeof e.precio == "number" ? e.precio : 0))
+        .map((e) => { try { return parseInt(e.precio) } catch(err) { return 0 } })
         .reduce((a, b) => a + b, 0)
     $: listado = `Hola! Soy ${nombre}. Estuve chusmeando tu Super Venta y me gustó lo siguiente:
 
@@ -52,6 +52,9 @@ Total: $${total}`
 
     function createItem(data) {
         const item = Object.fromEntries( zip(itemProps, data) )
+        item.desc = item.desc
+            .replace(new RegExp('  ', 'g'), '\n\n')
+            .replace(new RegExp(' •', 'g'), '\n•')
         item.fotos = item.fotos && item.fotos.trim().split(', ').map(f => f.split(' '))
         return item
     }
