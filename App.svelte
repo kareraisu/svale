@@ -1,6 +1,7 @@
 <script>
     import { items, modals } from "./store"
     import { Button, Modal, Icon } from "svelte-chota"
+    import mock from './mocks'
 
     const SHEET_ID = '2PACX-1vTnow5FsrJH_liAk7Pw6JjjLxAGAibMSeM7wmA17eNcbjYUOIPpkW_MjD0SjhTrxLzGtAPN-cTcpPjC'
     const XRATE_PATH = '.dolar .compra .val'
@@ -10,8 +11,10 @@
         xrate: `https://dolarhoy.com/`,
     }
     let ENV = {}
+    const dev = false
 
     let loading = true
+    let config
     let publish
     let xrate
     const thepass = 'YWxvaG9tb3Jh'
@@ -49,7 +52,14 @@ Total: $${total}`
     $: mailref = `mailto:${ENV.EMAIL}?subject=${encodeURI(`[Super Venta] Listado de ${nombre}`)}&body=${encodeURI(listado)}`
     $: $modals.detail = currentItem.nombre
 
-    fetchConfig()
+    init()
+
+    async function init() {
+        dev ? setConfig(mock.config) : await fetchConfig()
+        await fetchRate()
+        await fetchData()
+        loading = false
+    }
 
     async function fetchConfig() {
         console.log('Fetching config...')
@@ -60,10 +70,7 @@ Total: $${total}`
             await setConfig(data)
         } catch (err) {
             console.error('Failed to fetch config')
-        } finally {
-            loading = false
         }
-            
     }
 
     async function fetchRate() {
@@ -75,6 +82,8 @@ Total: $${total}`
             setRate(data)
         } catch (err) {
             console.error('Failed to fetch exchange rate:', err)
+            console.warn('Falling back to config rate:', config.xrate)
+            xrate = config.xrate
         }
     }
 
@@ -91,16 +100,10 @@ Total: $${total}`
     }
 
     async function setConfig(data) {
-        data = data.split(/\r\n/).map(row => row.split(/\t/))
-        config = Object.fromEntries(data)
+        const rows = data.split(/\n/).map(row => row.split(/\t/).map(v => v.trim()))
+        config = Object.fromEntries( zip(...rows) )
         console.log('Loaded config:', config)
-        publish = config.publish
-        if (!publish) return
-        await fetchRate()
-        if (!xrate) {
-            xrate = config.xrate
-            console.warn('Falling back to config rate:', xrate)
-        }
+        publish = !!config.publish
     }
 
     function setRate(data) {
@@ -180,7 +183,7 @@ Total: $${total}`
         <i class="huge">⚙️</i>
         <h1>Cargando...</h1>
     </div>
-{:else if !publish || !xrate}
+{:else if !publish || !xrate || !$items.length}
     <div class="gate">
         <i class="huge">😅</i>
         <h2>Disculpa... <br> Estamos actualizando nuestro catálogo</h2>
