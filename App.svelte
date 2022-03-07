@@ -2,9 +2,19 @@
     import { items, modals } from "./store"
     import { Button, Modal, Icon } from "svelte-chota"
 
+    const SHEET_ID = '2PACX-1vTnow5FsrJH_liAk7Pw6JjjLxAGAibMSeM7wmA17eNcbjYUOIPpkW_MjD0SjhTrxLzGtAPN-cTcpPjC'
+    const XRATE_PATH = '.dolar .compra .val'
+    const API = {
+        data: `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=0&single=true&output=tsv`,
+        config: `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=435559156&single=true&output=tsv`,
+        xrate: `https://dolarhoy.com/`,
+    }
     let ENV = {}
-    const API = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTnow5FsrJH_liAk7Pw6JjjLxAGAibMSeM7wmA17eNcbjYUOIPpkW_MjD0SjhTrxLzGtAPN-cTcpPjC/pub?gid=0&single=true&output=tsv'
-    const thepass = 'alohomora'
+
+    let loading = true
+    let publish
+    let xrate
+    const thepass = 'YWxvaG9tb3Jh'
     let pass = location.hash.substr(1)
     let darkTheme = true
     const ALL = "🌌 Todo"
@@ -19,8 +29,8 @@
 	$modals.tip = false
     $modals.checkout = 0
 
-    $: valid = pass && (pass.toLowerCase() === thepass)
-    $: valid && fetchData()
+    $: valid = pass && (pass.toLowerCase() === atob(thepass))
+    $: valid && xrate && fetchData()
     $: filtered =
         category == ALL
             ? $items
@@ -39,13 +49,75 @@ Total: $${total}`
     $: mailref = `mailto:${ENV.EMAIL}?subject=${encodeURI(`[Super Venta] Listado de ${nombre}`)}&body=${encodeURI(listado)}`
     $: $modals.detail = currentItem.nombre
 
+    fetchConfig()
+
+    async function fetchConfig() {
+        console.log('Fetching config...')
+        try {
+            const res = await fetch(API.config)
+            if (!res.ok) throw 'Res not ok'
+            const data = await res.text()
+            await setConfig(data)
+        } catch (err) {
+            console.error('Failed to fetch config')
+        } finally {
+            loading = false
+        }
+            
+    }
+
+    async function fetchRate() {
+        console.log('Fetching currency exchange rate...')
+        try {
+            const res = await fetch(API.xrate)
+            if (!res.ok) throw 'Res not ok'
+            const data = await res.text()
+            setRate(data)
+        } catch (err) {
+            console.error('Failed to fetch exchange rate:', err)
+        }
+    }
+
+    async function fetchData() {
+        console.log('Fetching product data...')
+        try {
+            const res = await fetch(API.data)
+            if (!res.ok) throw 'Res not ok'
+            const data = await res.text()
+            setData(data)
+        } catch (err) {
+            console.error('Failed to fetch product data')
+        }
+    }
+
+    async function setConfig(data) {
+        data = data.split(/\r\n/).map(row => row.split(/\t/))
+        config = Object.fromEntries(data)
+        console.log('Loaded config:', config)
+        publish = config.publish
+        if (!publish) return
+        await fetchRate()
+        if (!xrate) {
+            xrate = config.xrate
+            console.warn('Falling back to config rate:', xrate)
+        }
+    }
+
+    function setRate(data) {
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(data, 'text/html')
+        let price = doc.querySelector(XRATE_PATH).textContent.replace('$', '')
+        xrate = parseInt(price)
+        console.log('Loaded exchange rate:', xrate)
+    }
+
     function setData(data) {
         data = data.split(/\r\n/).map(row => row.split(/\t/))
         itemProps = data.shift()
         data = data
             .map(createItem)
             .filter(el => el.desc && el.fotos && el.precio && !el.interesade)
-            console.log('Loaded product data:', data)
+        console.log('Loaded product data:', data)
         categories = [ALL, ...new Set(data.map((e) => e.categoria))]
         items.set(data)
     }
@@ -56,23 +128,13 @@ Total: $${total}`
             .replace(new RegExp('  ', 'g'), '\n\n')
             .replace(new RegExp(' •', 'g'), '\n•')
         item.fotos = item.fotos && item.fotos.trim().split(', ').map(f => f.split(' '))
+        item.precio = item.precio * xrate
         return item
     }
 
     function zip(...arrays) {
         const length = Math.min(...arrays.map(arr => arr.length))
         return Array.from({ length }, (_, index) => arrays.map((array => array[index])))
-    }
-
-    async function fetchData() {
-        const res = await fetch(API)
-        if (res.ok)
-            try {
-                const data = await res.text()
-                setData(data)
-            } catch (err) {
-                console.error('Failed to fetch data')
-            }
     }
 
     function toggleTheme() {
@@ -113,9 +175,18 @@ Total: $${total}`
 
 </script>
 
-
-
-{#if !valid}
+{#if loading}
+    <div class="gate">
+        <i class="huge">⚙️</i>
+        <h1>Cargando...</h1>
+    </div>
+{:else if !publish || !xrate}
+    <div class="gate">
+        <i class="huge">😅</i>
+        <h2>Disculpa... <br> Estamos actualizando nuestro catálogo</h2>
+        <h3>Por favor, volvé en un par de días!</h3>
+    </div>
+{:else if !valid}
     <div class="gate">
         <img src="gate.jpg" alt="Puertas de Moria">
         <h3>Escribe, amigo, y entra</h3>
@@ -363,12 +434,17 @@ Total: $${total}`
 
 
 <style>
+    .huge {
+        font-style: normal;
+        font-size: 5em;
+    }
 
     .gate {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        text-align: center;
         height: 100vh;
     }
 

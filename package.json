@@ -22,6 +22,11 @@
     "start": "sirv public",
     "start:dev": "sirv public --dev"
   },
-  "keywords": ["svelte", "sale", "product", "catalog"],
+  "keywords": [
+    "svelte",
+    "sale",
+    "product",
+    "catalog"
+  ],
   "description": ""
 }
