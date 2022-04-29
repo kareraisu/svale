@@ -277,7 +277,7 @@ Total: $${total}`
                 </ul>
                 <div class="arrows">
                     <div class="prev" on:click={prev} ></div>
-                    <a class="zoom" href={currentItem?.fotos[currentPic][0]} target="_blank"> </a>
+                    <a class="zoom" href={currentItem && currentItem.fotos[currentPic][0]} target="_blank"> </a>
                     <div class="next" on:click={next} ></div>
                 </div>
                 <nav>
