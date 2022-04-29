@@ -445,14 +445,14 @@ Total: $${total}`
                 <a href={waref} class="textc"
                     on:click={() => $modals.checkout = 4}>
                     <img height="100%"
-                        src="https://image.flaticon.com/icons/png/128/1384/1384055.png"
+                        src="./whatsapp.svg"
                         alt="Whatsapp">
                     <div>Whatsapp</div>
                 </a>
                 <a href={mailref} class="textc"
                     on:click={() => $modals.checkout = 4}>
                     <img height="100%"
-                        src="https://image.flaticon.com/icons/png/128/893/893257.png"
+                        src="./email.svg"
                         alt="Email">
                     <div>Email</div>
                 </a>
