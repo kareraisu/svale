@@ -8,15 +8,16 @@
     const API = {
         data: `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=0&single=true&output=tsv`,
         config: `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=435559156&single=true&output=tsv`,
-        xrate: `https://dolarhoy.com/`,
+        xrate: `https://dolarhoy.com/`, // not used ATM
     }
     let ENV = {}
-    const dev = false
+
+    // SET THIS TO USE MOCK CONFIG
+    const dev = true
 
     let loading = true
     let config
     let publish
-    let xrate
     const thepass = 'YWxvaG9tb3Jh'
     let pass = location.hash.substr(1)
     let darkTheme = true
@@ -26,6 +27,8 @@
     let itemProps = []
     let currentItem = {}
     let nombre = ""
+    let currentPic = 0
+    let slider
 
     $modals.welcome = true
     $modals.detail = false
@@ -33,7 +36,6 @@
     $modals.checkout = 0
 
     $: valid = pass && (pass.toLowerCase() === atob(thepass))
-    $: valid && xrate && fetchData()
     $: filtered =
         category == ALL
             ? $items
@@ -56,7 +58,7 @@ Total: $${total}`
 
     async function init() {
         dev ? setConfig(mock.config) : await fetchConfig()
-        await fetchRate()
+        // await fetchRate()
         await fetchData()
         loading = false
     }
@@ -73,6 +75,9 @@ Total: $${total}`
         }
     }
 
+    /**
+     * Not used ATM
+     */
     async function fetchRate() {
         console.log('Fetching currency exchange rate...')
         try {
@@ -106,12 +111,16 @@ Total: $${total}`
         publish = !!config.publish
     }
 
+    /**
+     * This expects `data` to be a webpage,
+     * it parses the html, selects a known node and extracts the price from it
+     * */ 
     function setRate(data) {
         const parser = new DOMParser()
         const doc = parser.parseFromString(data, 'text/html')
         let price = doc.querySelector(XRATE_PATH).textContent.replace('$', '')
-        xrate = parseInt(price)
-        console.log('Loaded exchange rate:', xrate)
+        config.xrate = parseInt(price)
+        console.log('Loaded exchange rate:', config.xrate)
     }
 
     function setData(data) {
@@ -131,7 +140,7 @@ Total: $${total}`
             .replace(new RegExp('  ', 'g'), '\n\n')
             .replace(new RegExp(' •', 'g'), '\n•')
         item.fotos = item.fotos && item.fotos.trim().split(', ').map(f => f.split(' '))
-        item.precio = item.precio * xrate
+        item.precio = Math.floor( Number(item.price) * Number(config.xrate) )
         return item
     }
 
@@ -165,25 +174,43 @@ Total: $${total}`
 		}, 250)
 	}
 
-    window.addEventListener('popstate', function() {
+    function closeModals(noBackNav) {
         const openModals = Object.values($modals).some(v => v)
             
         if (openModals) {
             // close all modals
             $modals = Object.fromEntries( Object.entries($modals).map(([k]) => [k,false]) )
+            // reset currentPic
+            currentPic = 0
             // deactivate back navigation
-            history.pushState(null, document.title, location.href)
+            if (noBackNav) history.pushState(null, document.title, location.href)
         }
-    })
+    }
+
+    function next() {
+        if (currentPic >= currentItem.fotos.length -1) return
+        currentPic++
+        slider.scrollTo({left: slider.offsetWidth * currentPic})
+    }
+
+    function prev() {
+        if (currentPic <= 0) return
+        currentPic--
+        slider.scrollTo({left: slider.offsetWidth * currentPic})
+    }
+
+    window.addEventListener('keydown', (e) => e.key === 'Escape' && closeModals(true))
+
+    window.addEventListener('popstate', () => closeModals(true))
 
 </script>
 
 {#if loading}
     <div class="gate">
-        <i class="huge">⚙️</i>
+        <i class="huge cog">⚙️</i>
         <h1>Cargando...</h1>
     </div>
-{:else if !publish || !xrate || !$items.length}
+{:else if !publish || !config.xrate || !$items.length}
     <div class="gate">
         <i class="huge">😅</i>
         <h2>Disculpa... <br> Estamos actualizando nuestro catálogo</h2>
@@ -196,7 +223,8 @@ Total: $${total}`
         <input bind:value={pass}>
     </div>
 {:else}
-<main class="rel">
+<main class="flex center">
+    <div class="layout">
     <div class="categories flex wrap">
         {#each categories as cat}
             <Button
@@ -209,7 +237,7 @@ Total: $${total}`
 
         <div class="abs click theme" on:click={toggleTheme}>{ darkTheme ? '☀️' : '🌑' }</div>
 
-        <button class="button contact scale bg-primary"
+        <button class="abs bottom right button contact scale bg-primary"
             on:click={() => ($modals.checkout = 1)}
         >👍 Listo!</button>
     </div>
@@ -218,11 +246,11 @@ Total: $${total}`
         {#each filtered as item}
         <div
             tabindex="0"
-            class="thumb card scale"
+            class="thumb card"
             on:click={(e) => (currentItem = item)}
             on:keydown={(e) => ["Enter", "Space"].includes(e.key) && (currentItem = item)}
-            style={`background-image: url(${item.fotos[0][1]})`}
         >
+            <div class="abs top left bg" style={`background-image: url(${item.fotos[0][1]})`}></div>
             {#if item.fav}
                 <div class="faved">💖</div>
             {/if}
@@ -242,13 +270,21 @@ Total: $${total}`
         <h4>{currentItem.nombre}</h4>
         <div class="flex detail">
             <div class="slider">
-                {#each currentItem.fotos as foto}
-                    <a href={foto[0]}
-                        target="_blank"
-                        class="img"
-                        style={`background-image: url(${foto[1]})`}
-                    > </a>
-                {/each}
+                <ul bind:this={slider}>
+                    {#each currentItem.fotos as foto, i}
+                        <div class="img" style={`background-image: url(${foto[1]})`} ></div>
+                    {/each}
+                </ul>
+                <div class="arrows">
+                    <div class="prev" on:click={prev} ></div>
+                    <a class="zoom" href={currentItem?.fotos[currentPic][0]} target="_blank"> </a>
+                    <div class="next" on:click={next} ></div>
+                </div>
+                <nav>
+                    {#each currentItem.fotos as _, i}
+                    <i class={currentPic === i ? 'selected' : ''}/>
+                    {/each}
+                </nav>
             </div>
             <div class="text">
                 <p class="small desc">{currentItem.desc}
@@ -272,7 +308,7 @@ Total: $${total}`
                 <hr />
                 <div class="spaced controls">
                     <button class="button outline"
-                        on:click={(e) => ($modals.detail = false)}
+                        on:click={closeModals}
                     >
                         👀 Seguir chusmeando
                     </button>
@@ -287,7 +323,7 @@ Total: $${total}`
     </Modal>
 
     <Modal
-        class="small card modal"
+        class="small bottom card modal"
         bind:open={$modals.tip}
         on:keydown={(e) => ["Escape"].includes(e.key) && ($modals.tip = false)}
     >
@@ -302,7 +338,7 @@ Total: $${total}`
         </div>
     </Modal>
 
-    <Modal class="card modal"
+    <Modal class="welcome small card modal"
         bind:open={$modals.welcome}
         on:keydown={e =>['Escape'].includes(e.key) && ($modals.welcome = false)}
     >
@@ -316,26 +352,27 @@ Total: $${total}`
 
         <h4 class="textc">📋 Instrucciones</h4>
         <ol>
-            <li>👀 Chusmeá lo que tenemos <small>(clickeá las fotos)</small></li>
-            <li>❤️ favoriteá lo que te guste</li>
+            <li><b>👀 Chusmeá</b> lo que tenemos</li>
+            <li><b>❤️ Favoriteá</b> lo que te guste</li>
             <li>Dale al <span class="button bg-primary">👍 Listo!</span> <small>(abajo a la derecha)</small>
-            para mandarnos tu listado por whatsapp o mail y luego poder coordinar la venta</li>
+            para mandarnos tu listado y luego poder coordinar la venta</li>
         </ol>
 
         <hr>
 
         <p class="small">
-            Aceptamos <b>efectivo</b>, <b>transferencia</b> o podemos hacerte un <b>link de mercadopago</b>
+            Aceptamos <b>💵 efectivo</b>, <b>💸 transferencia</b> o podemos hacerte un <b>🔗 link de mercadopago</b>
             para que puedas usar el medio de pago que prefieras.
         </p>
         <p class="small">
-            Los productos se retiran por <b>Villa Urquiza (CABA)</b>, zona Av. Congreso y Av. Constituyentes.
-            Podemos coordinar envío de paquetes no demasiado grandes.
+            Los productos se retiran por <b>📍 Villa Urquiza (CABA)</b>, zona Av. Congreso y Av. Constituyentes.
+            Podemos coordinar <b>🚚 envío de paquetes</b> no demasiado grandes.
         </p>
 
         <hr>
 
         <p class="textc">Esperamos que encuentres algo de tu agrado! 😊</p>
+
         <div class="spaced controls">
             <Button primary
                 tabindex="0"
@@ -343,7 +380,7 @@ Total: $${total}`
         </div>
     </Modal>
 
-    <Modal class="small card modal"
+    <Modal class="small bottom card modal"
         bind:open={$modals.checkout}
         on:keydown={e =>['Escape'].includes(e.key) && ($modals.checkout = 0)}
     >
@@ -432,6 +469,7 @@ Total: $${total}`
         {/if}
         {/if}
     </Modal>
+</div>
 </main>
 {/if}
 
@@ -452,10 +490,15 @@ Total: $${total}`
     }
 
     main {
-        display: flex;
-        flex-direction: column;
         height: 100vh;
         padding: 2rem 4rem 5rem 4rem;
+    }
+
+    .layout {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        max-width: 1400px;
     }
 
     .content {
@@ -468,16 +511,12 @@ Total: $${total}`
     }
 
     .contact {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        margin: var(--space);
         z-index: 1;
         font-size: 2rem;
     }
 
     .theme {
-        right: var(--d-space);
+        right: -60px;
         font-size: 3rem;
     }
 
@@ -513,12 +552,22 @@ Total: $${total}`
     }
 
     .thumb {
+        overflow: hidden;
 		position: relative;
 		height: 20rem;
+	}
+    .thumb .bg {
+        height: 100%;
+        width: 100%;
 		background-position: center;
 		background-repeat: no-repeat;
 		background-size: cover;
-	}
+        transition: transform .2s;
+    }
+    .thumb:hover .bg,
+    .thumb:focus .bg {
+        transform: scale(1.05);
+    }
 	.thumb .title {
 		color: var(--color-white);
 		font-size: calc(var(--font-size) * 1.2);
@@ -577,9 +626,8 @@ Total: $${total}`
 		width: 100%;
 		background-position: center;
 		background-repeat: no-repeat;
-		background-size: cover;
+		background-size: contain;
 		background-color: var(--bg-color);
-		cursor: zoom-in;
 	}
 	.text {
 		margin-left: 2.5rem;
@@ -615,6 +663,7 @@ Total: $${total}`
 
         .content {
             grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+            max-height: calc(100vh - 160px);
         }
 
         .theme {

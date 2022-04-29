@@ -1,6 +1,6 @@
 let mock = {
     config: `publish	xrate	updated
-    X	200	2022-03-06`,
+    X	195	2022-03-06`,
 }
 
 //mock = Object.fromEntries( Object.entries(mock).map(([k,v]) => [k, delay(v)]) )
