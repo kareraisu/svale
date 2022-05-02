@@ -573,6 +573,7 @@ Total: $${total}`
 		font-size: calc(var(--font-size) * 1.2);
 		line-height: 1.2;
 		text-shadow: 0 0 4px black;
+        transform: scale(1);
 	}
 	.thumb .tag {
 		position: absolute;
