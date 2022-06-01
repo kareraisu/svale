@@ -239,6 +239,10 @@ input:focus {
 .inline { display: inline-block }
 .flex { display: flex }
 .center { justify-content: center }
+.center-both {
+    align-items: center;
+    justify-content: center;
+}
 .spaced { justify-content: space-evenly }
 .wrap { flex-wrap: wrap }
 .textc { text-align: center }
@@ -246,6 +250,15 @@ input:focus {
 .m0 { margin: 0 }
 .mauto { margin: auto }
 .click { cursor: pointer }
+.on-hover {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+*:hover > .on-hover,
+*:focus > .on-hover {
+    opacity: 1;
+}
+
 
 /* responsiveness */
 

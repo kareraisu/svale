@@ -165,10 +165,10 @@ Total: $${total}`
         }
     }
 
-	function toggleFav(e) {
-		currentItem.fav = !currentItem.fav
-		const i = $items.findIndex((e) => e.nombre == currentItem.nombre)
-		$items[i] = currentItem
+	function toggleFav(item = currentItem) {
+		item.fav = !item.fav
+		const i = $items.findIndex((e) => e.nombre == item.nombre)
+		$items[i] = item
 		setTimeout(() => {
 			$modals.detail = false
 		}, 250)
@@ -246,21 +246,19 @@ Total: $${total}`
         {#each filtered as item}
         <div
             tabindex="0"
-            class="thumb card"
-            on:click={(e) => (currentItem = item)}
+            class={"thumb card " + (item.fav ? 'faved' : '')}
             on:keydown={(e) => ["Enter", "Space"].includes(e.key) && (currentItem = item)}
         >
-            <div class="abs top left bg" style={`background-image: url(${item.fotos[0][1]})`}></div>
-            {#if item.fav}
-                <div class="faved">💖</div>
-            {/if}
-            <div class="on-hover title">{item.nombre}</div>
-            <div class="on-hover tag">$ {item.precio}</div>
+            <div class="abs top left bg"
+                style={`background-image: url(${item.fotos[0][1]})`}
+                on:click={() => (currentItem = item)}
+            ></div>
+            <div class="on-hover heart" on:click={() => toggleFav(item)}>{item.fav ? "💖" : "❤️"}</div>
+            <div class="on-hover title" on:click={() => (currentItem = item)}>{item.nombre}</div>
+            <div class="on-hover tag" on:click={() => (currentItem = item)}>$ {item.precio}</div>
         </div>
         {/each}
     </div>
-
-    <p class="abs bottom small m0">favicon by <a href="http://www.dariusdan.com" target="_blank" title="Darius Dan">Darius Dan</a></p>
 
     <Modal
         class="card modal"
@@ -310,12 +308,12 @@ Total: $${total}`
                     <button class="button outline"
                         on:click={closeModals}
                     >
-                        👀 Seguir chusmeando
+                        {currentItem.fav ? "👀 Seguir chusmeando" : "😐 Mmm paso"}
                     </button>
-                    <button class="bg-primary fav"
-                        on:click={toggleFav}
+                    <button class="bg-primary fav-btn"
+                        on:click={() => toggleFav()}
                     >
-                        {currentItem.fav ? "💖" : "❤️"}
+                        {currentItem.fav ? "😐 Ya no lo quiero" : "😍 Lo quiero!"}
                     </button>
                 </div>
             </div>
@@ -380,7 +378,7 @@ Total: $${total}`
         </div>
     </Modal>
 
-    <Modal class="small bottom card modal"
+    <Modal class="small bottom flex card modal center-both"
         bind:open={$modals.checkout}
         on:keydown={e =>['Escape'].includes(e.key) && ($modals.checkout = 0)}
     >
@@ -530,7 +528,7 @@ Total: $${total}`
     }
     tbody {
         overflow-y: scroll;
-        max-height: calc(100vh - 37rem);
+        max-height: 300px;
     }
     thead th:nth-child(1),
     tbody td:nth-child(1),
@@ -556,6 +554,9 @@ Total: $${total}`
 		position: relative;
 		height: 20rem;
 	}
+    .thumb.faved {
+        transform: scale(0.9);
+    }
     .thumb .bg {
         height: 100%;
         width: 100%;
@@ -567,6 +568,20 @@ Total: $${total}`
     .thumb:hover .bg,
     .thumb:focus .bg {
         transform: scale(1.05);
+    }
+    .thumb.faved .bg {
+        filter: grayscale(1) opacity(0.5);
+    }
+    .thumb .heart {
+		position: absolute;
+        bottom: 1.5rem;
+		left: 1.5rem;
+		font-size: 2.5rem;
+        text-shadow: 0 0 4px black;
+        transition: transform .2s;
+	}
+    .thumb .heart:hover {
+        transform: scale(1.2);
     }
 	.thumb .title {
 		color: var(--color-white);
@@ -613,14 +628,8 @@ Total: $${total}`
 		width: 140px;
         padding: 1rem 1.5rem;
 	}
-	.fav {
+	.fav-btn {
 		background-color: transparent;
-		font-size: 3rem;
-	}
-	.faved {
-		position: absolute;
-		right: 1.5rem;
-		font-size: 2.5rem;
 	}
 
 	.img {
@@ -637,14 +646,6 @@ Total: $${total}`
 		font-size: 3rem;
 	}
 
-	.on-hover {
-		opacity: 0;
-		transition: opacity 0.2s;
-	}
-	*:hover > .on-hover,
-	*:focus > .on-hover {
-		opacity: 1;
-	}
     @media (max-width: 900px) {
 
         main {
