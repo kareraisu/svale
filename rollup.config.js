@@ -30,9 +30,9 @@ export default {
     // replace tokens on compile,
     // needed for accessing node env vars
     replace({
-      'ENV.WA_NUMBER':`'${process.env.WA_NUMBER}'`,
+      'ENV.SHEET_ID': `'${process.env.SHEET_ID}'`,
       'ENV.EMAIL':`'${process.env.EMAIL}'`,
-      'ENV.API': `'${process.env.API}'`,
+      'ENV.WA_NUMBER':`'${process.env.WA_NUMBER}'`,
     }),
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In

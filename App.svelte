@@ -3,14 +3,13 @@
     import { Button, Modal, Icon } from "svelte-chota"
     import mock from './mocks'
 
-    const SHEET_ID = '2PACX-1vTnow5FsrJH_liAk7Pw6JjjLxAGAibMSeM7wmA17eNcbjYUOIPpkW_MjD0SjhTrxLzGtAPN-cTcpPjC'
+    let ENV = {}
     const XRATE_PATH = '.dolar .compra .val'
     const API = {
-        data: `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=0&single=true&output=tsv`,
-        config: `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=435559156&single=true&output=tsv`,
+        data: `https://docs.google.com/spreadsheets/d/e/${ENV.SHEET_ID}/pub?gid=0&single=true&output=tsv`,
+        config: `https://docs.google.com/spreadsheets/d/e/${ENV.SHEET_ID}/pub?gid=435559156&single=true&output=tsv`,
         xrate: `https://dolarhoy.com/`, // not used ATM
     }
-    let ENV = {}
 
     // SET THIS TO USE MOCK CONFIG
     const dev = true
