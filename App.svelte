@@ -2,24 +2,27 @@
     import { items, modals } from "./store"
     import { Button, Modal, Icon } from "svelte-chota"
     import mock from './mocks'
+    import DEV_ENV from '.env'
 
-    let ENV = {}
+    // SET THIS TO USE MOCK ENV AND CONFIG
+    const dev = false
+
+    const ENV = dev ? DEV_ENV : {}
+    dev && console.log('Loaded env:', ENV)
     const XRATE_PATH = '.dolar .compra .val'
     const API = {
-        data: `https://docs.google.com/spreadsheets/d/e/${ENV.SHEET_ID}/pub?gid=0&single=true&output=tsv`,
-        config: `https://docs.google.com/spreadsheets/d/e/${ENV.SHEET_ID}/pub?gid=435559156&single=true&output=tsv`,
+        data: `https://docs.google.com/spreadsheets/d/e/${ENV['SHEET_ID']}/pub?gid=0&single=true&output=tsv`,
+        config: `https://docs.google.com/spreadsheets/d/e/${ENV['SHEET_ID']}/pub?gid=435559156&single=true&output=tsv`,
         xrate: `https://dolarhoy.com/`, // not used ATM
     }
 
-    // SET THIS TO USE MOCK CONFIG
-    const dev = true
-
     let loading = true
+    let welcomed = false
     let config
     let publish
     const thepass = 'YWxvaG9tb3Jh'
     let pass = location.hash.substr(1)
-    let darkTheme = true
+    let darkTheme = false
     const ALL = "🌌 Todo"
     let category = ALL
     let categories = []
@@ -35,6 +38,7 @@
     $modals.checkout = 0
 
     $: valid = pass && (pass.toLowerCase() === atob(thepass))
+    $: $modals.welcome = !welcomed
     $: filtered =
         category == ALL
             ? $items
@@ -56,10 +60,19 @@ Total: $${total}`
     init()
 
     async function init() {
+        applyTheme()
         dev ? setConfig(mock.config) : await fetchConfig()
         // await fetchRate()
         await fetchData()
+        checkWelcome()
         loading = false
+    }
+
+    function checkWelcome() {
+        welcomed = localStorage.getItem('welcomed')
+        if (!welcomed) {
+            localStorage.setItem('welcomed', true)
+        }
     }
 
     async function fetchConfig() {
@@ -147,8 +160,14 @@ Total: $${total}`
         const length = Math.min(...arrays.map(arr => arr.length))
         return Array.from({ length }, (_, index) => arrays.map((array => array[index])))
     }
+    
 
     function toggleTheme() {
+        darkTheme = !darkTheme
+        applyTheme()
+    }
+
+    function applyTheme() {
         const light = {
             'bg-color': 'color-white',
             'font-color': 'color-black',
@@ -157,7 +176,6 @@ Total: $${total}`
             'bg-color': 'color-darkGrey',
             'font-color': 'color-white',
         }
-        darkTheme = !darkTheme
         const theme = darkTheme ? dark : light
         for (let prop of Object.keys(theme)) {
             document.documentElement.style.setProperty('--' + prop, `var(--${theme[prop]})`)
@@ -186,13 +204,13 @@ Total: $${total}`
         }
     }
 
-    function next() {
+    function nextPic() {
         if (currentPic >= currentItem.fotos.length -1) return
         currentPic++
         slider.scrollTo({left: slider.offsetWidth * currentPic})
     }
 
-    function prev() {
+    function prevPic() {
         if (currentPic <= 0) return
         currentPic--
         slider.scrollTo({left: slider.offsetWidth * currentPic})
@@ -217,7 +235,7 @@ Total: $${total}`
     </div>
 {:else if !valid}
     <div class="gate">
-        <img src="gate.jpg" alt="Puertas de Moria">
+        <img src="img/gate.jpg" alt="Puertas de Moria">
         <h3>Escribe, amigo, y entra</h3>
         <input bind:value={pass}>
     </div>
@@ -234,9 +252,12 @@ Total: $${total}`
             </Button>
         {/each}
 
-        <div class="abs click theme" on:click={toggleTheme}>{ darkTheme ? '☀️' : '🌑' }</div>
+        <div class="abs flex actions">
+            <div class="click theme" on:click={toggleTheme}>{ darkTheme ? '☀️' : '🌑' }</div>
+            <div class="click help" on:click={() => $modals.welcome = true}>📋</div>
+        </div>
 
-        <button class="abs bottom right button contact scale bg-primary"
+        <button class="abs bottom right button done scale bg-primary"
             on:click={() => ($modals.checkout = 1)}
         >👍 Listo!</button>
     </div>
@@ -253,8 +274,8 @@ Total: $${total}`
                 on:click={() => (currentItem = item)}
             ></div>
             <div class="on-hover heart" on:click={() => toggleFav(item)}>{item.fav ? "💖" : "❤️"}</div>
-            <div class="on-hover title" on:click={() => (currentItem = item)}>{item.nombre}</div>
-            <div class="on-hover tag" on:click={() => (currentItem = item)}>$ {item.precio}</div>
+            <div class="on-hover hide-phone title" on:click={() => (currentItem = item)}>{item.nombre}</div>
+            <div class="on-hover hide-phone tag" on:click={() => (currentItem = item)}>$ {item.precio}</div>
         </div>
         {/each}
     </div>
@@ -273,9 +294,9 @@ Total: $${total}`
                     {/each}
                 </ul>
                 <div class="arrows">
-                    <div class="prev" on:click={prev} ></div>
+                    <div class="prev" on:click={prevPic} ></div>
                     <a class="zoom" href={currentItem && currentItem.fotos[currentPic][0]} target="_blank"> </a>
-                    <div class="next" on:click={next} ></div>
+                    <div class="next" on:click={nextPic} ></div>
                 </div>
                 <nav>
                     {#each currentItem.fotos as _, i}
@@ -296,7 +317,7 @@ Total: $${total}`
                         {currentItem.estado}
                     </div>
                     <Icon on:click={() => $modals.tip = true}
-                        src='https://icongr.am/clarity/help.svg'
+                        src='img/help.svg'
                         size='2rem'
                         class='click'
                     />
@@ -437,19 +458,19 @@ Total: $${total}`
         {#if $modals.checkout == 3}
         <div class="textc">
             <h3>Mandanos tu listado!</h3>
-            <p>2. Elegí un medio de contacto:</p>
+            <p>2. Elegí un medio de doneo:</p>
             <div class="spaced controls">
                 <a href={waref} class="textc"
                     on:click={() => $modals.checkout = 4}>
                     <img height="100%"
-                        src="./whatsapp.svg"
+                        src="img/whatsapp.svg"
                         alt="Whatsapp">
                     <div>Whatsapp</div>
                 </a>
                 <a href={mailref} class="textc"
                     on:click={() => $modals.checkout = 4}>
                     <img height="100%"
-                        src="./email.svg"
+                        src="img/email.svg"
                         alt="Email">
                     <div>Email</div>
                 </a>
@@ -507,13 +528,16 @@ Total: $${total}`
         overflow-y: auto;
     }
 
-    .contact {
+    .done {
         z-index: 1;
         font-size: 2rem;
     }
 
-    .theme {
+    .actions {
         right: -60px;
+    }
+
+    .theme, .help {
         font-size: 3rem;
     }
 
@@ -667,7 +691,7 @@ Total: $${total}`
             max-height: calc(100vh - 160px);
         }
 
-        .theme {
+        .actions {
             position: fixed;
             bottom: 0;
             left: var(--space);
@@ -675,13 +699,29 @@ Total: $${total}`
             z-index: 1;
         }
 
+        .done {
+            position: fixed;
+            margin: var(--h-space);
+        }
+
         .hide-phone {
             display: none;
+        }
+
+        .show-phone {
+            display: block;
         }
 
         .thumb {
 			height: 10rem;
 		}
+        .thumb .heart {
+            bottom: initial;
+            left: initial;
+            top: -0.2rem;
+            right: 0rem;
+            font-size: 2rem;
+        }
 		.flex {
 			flex-wrap: wrap;
 		}

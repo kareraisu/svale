@@ -173,7 +173,7 @@ input:focus {
     opacity: 0.5;
 }
 .slider .zoom::after {
-    content: url("./fullscreen.svg");
+    content: url("./img/fullscreen.svg");
     transform: scale(1.4);
     background: rgba(0,0,0,0.5);
 }
@@ -250,10 +250,6 @@ input:focus {
 .m0 { margin: 0 }
 .mauto { margin: auto }
 .click { cursor: pointer }
-.on-hover {
-    opacity: 0;
-    transition: opacity 0.2s;
-}
 *:hover > .on-hover,
 *:focus > .on-hover {
     opacity: 1;
@@ -261,6 +257,15 @@ input:focus {
 
 
 /* responsiveness */
+
+@media (min-width: 500px) {
+
+    .on-hover {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+}
 
 
 @media (max-width: 900px) {
@@ -306,10 +311,11 @@ input:focus {
 
     .categories button {
         font-size: calc(var(--font-size) * 1.5);
-        padding: 0.8rem 1rem;
+        padding: 0.7rem 0.5rem;
     }
 
     .slider nav i {
         inline-size: 1rem;
     }
+
 }
