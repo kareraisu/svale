@@ -2,20 +2,12 @@
     import { items, modals } from "./store"
     import { Button, Modal, Icon } from "svelte-chota"
     import mock from './mocks'
-    import DEV_ENV from '.env'
 
-    // SET THIS TO USE MOCK ENV AND CONFIG
-    const dev = false
+    // SET THIS TO USE LOCAL ENV VARS AND MOCK CONFIG
+    const dev = true
 
-    const ENV = dev ? DEV_ENV : {}
-    dev && console.log('Loaded env:', ENV)
-    const XRATE_PATH = '.dolar .compra .val'
-    const API = {
-        data: `https://docs.google.com/spreadsheets/d/e/${ENV['SHEET_ID']}/pub?gid=0&single=true&output=tsv`,
-        config: `https://docs.google.com/spreadsheets/d/e/${ENV['SHEET_ID']}/pub?gid=435559156&single=true&output=tsv`,
-        xrate: `https://dolarhoy.com/`, // not used ATM
-    }
-
+    let ENV = {}
+    let API = {}
     let loading = true
     let welcomed = false
     let config
@@ -61,11 +53,24 @@ Total: $${total}`
 
     async function init() {
         applyTheme()
-        dev ? setConfig(mock.config) : await fetchConfig()
+        await loadEnv()
         // await fetchRate()
         await fetchData()
         checkWelcome()
         loading = false
+    }
+
+    async function loadEnv() {
+        if (dev) {
+            ENV = (await import('../.env')).default
+            console.log('Loaded dev env:', ENV)
+        }
+        API = {
+            data: `https://docs.google.com/spreadsheets/d/e/${ENV.SHEET_ID}/pub?gid=0&single=true&output=tsv`,
+            config: `https://docs.google.com/spreadsheets/d/e/${ENV.SHEET_ID}/pub?gid=435559156&single=true&output=tsv`,
+            xrate: ENV.XRATE_URL, // not used ATM
+        }
+        dev ? setConfig(mock.config) : await fetchConfig()
     }
 
     function checkWelcome() {
@@ -130,7 +135,7 @@ Total: $${total}`
     function setRate(data) {
         const parser = new DOMParser()
         const doc = parser.parseFromString(data, 'text/html')
-        let price = doc.querySelector(XRATE_PATH).textContent.replace('$', '')
+        let price = doc.querySelector(ENV.XRATE_DOM_PATH).textContent.replace('$', '')
         config.xrate = parseInt(price)
         console.log('Loaded exchange rate:', config.xrate)
     }
@@ -252,7 +257,7 @@ Total: $${total}`
             </Button>
         {/each}
 
-        <div class="abs flex actions">
+        <div class="flex actions">
             <div class="click theme" on:click={toggleTheme}>{ darkTheme ? '☀️' : '🌑' }</div>
             <div class="click help" on:click={() => $modals.welcome = true}>📋</div>
         </div>
@@ -523,7 +528,7 @@ Total: $${total}`
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
         grid-gap: var(--space);
-        margin-top: var(--space);
+        margin-top: var(--d-space);
         overflow-x: hidden;
         overflow-y: auto;
     }
@@ -534,7 +539,7 @@ Total: $${total}`
     }
 
     .actions {
-        right: -60px;
+        margin-left: var(--space);
     }
 
     .theme, .help {
@@ -693,15 +698,17 @@ Total: $${total}`
 
         .actions {
             position: fixed;
-            bottom: 0;
+            bottom: var(--h-space);
             left: var(--space);
-            right: initial;
+            margin: 0;
             z-index: 1;
         }
 
         .done {
             position: fixed;
-            margin: var(--h-space);
+            bottom: var(--h-space);
+            right: var(--d-space);
+            margin: 1rem;
         }
 
         .hide-phone {

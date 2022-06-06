@@ -13,9 +13,18 @@ export default {
   input: "index.js",
   output: {
     sourcemap: true,
-    format: "iife",
+    format: "es",
     name: "app",
-    file: "public/bundle.js"
+    dir: "public/build",
+    //file: "public/bundle.js",
+  },
+  manualChunks: (moduleName) => {
+    if (moduleName.includes("node_modules")) {
+      return "vendor"
+    }
+    if (moduleName.includes("src/")) {
+      return "webapp"
+    }
   },
   plugins: [
     svelte({
@@ -24,15 +33,15 @@ export default {
       // we'll extract any component CSS out into
       // a separate file — better for performance
       css: css => {
-        css.write("public/bundle.css");
+        css.write("bundle.css");
       }
     }),
     // replace tokens on compile,
-    // needed for accessing node env vars
-    replace({
+    // needed for accessing prod env vars
+    production && replace({
       'ENV.SHEET_ID': `'${process.env.SHEET_ID}'`,
-      'ENV.EMAIL':`'${process.env.EMAIL}'`,
-      'ENV.WA_NUMBER':`'${process.env.WA_NUMBER}'`,
+      'ENV.EMAIL': `'${process.env.EMAIL}'`,
+      'ENV.WA_NUMBER': `'${process.env.WA_NUMBER}'`,
     }),
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In
