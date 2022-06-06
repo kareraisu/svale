@@ -3,7 +3,8 @@
     import { Button, Modal, Icon } from "svelte-chota"
     import mock from './mocks'
 
-    // SET THIS TO USE LOCAL ENV VARS AND MOCK CONFIG
+    // USE THIS TO SWITCH ENV VARS AND MOCK CONFIG
+    //import LOCAL_ENV from '../.env'
     const dev = false
 
     let ENV = {}
@@ -62,7 +63,12 @@ Total: $${total}`
 
     async function loadEnv() {
         if (dev) {
-            ENV = (await import('../.env')).default
+            // Cannot use this cause seems that rollup checks dynamic imports
+            // while bundling and chokes if it cannot resolve them
+            // (even if try-catching and even if code is unreachable)
+            // ENV = (await import('../.env')).default
+            
+            ENV = LOCAL_ENV
             console.log('Loaded dev env:', ENV)
         }
         API = {
