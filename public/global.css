@@ -314,6 +314,10 @@ input:focus {
         padding: 0.7rem 0.5rem;
     }
 
+    .slider ul {
+        block-size: initial;
+    }
+
     .slider nav i {
         inline-size: 1rem;
     }

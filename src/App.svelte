@@ -246,7 +246,7 @@ Total: $${total}`
     </div>
 {:else if !valid}
     <div class="gate">
-        <img src="img/gate.jpg" alt="Puertas de Moria">
+        <img preload src="img/gate.jpg" alt="Puertas de Moria">
         <h3>Escribe, amigo, y entra</h3>
         <input bind:value={pass}>
     </div>
@@ -469,7 +469,7 @@ Total: $${total}`
         {#if $modals.checkout == 3}
         <div class="textc">
             <h3>Mandanos tu listado!</h3>
-            <p>2. Elegí un medio de doneo:</p>
+            <p>2. Elegí un medio de contacto:</p>
             <div class="spaced controls">
                 <a href={waref} class="textc"
                     on:click={() => $modals.checkout = 4}>
@@ -646,19 +646,20 @@ Total: $${total}`
     }
 
 	.slider {
-		flex-basis: 70%;
+		flex-basis: 60%;
 	}
 
 	.text {
-		flex-basis: 30%;
+		flex-basis: 40%;
+        margin-left: 2.5rem;
 	}
 	.desc {
-		height: 40%;
+		max-height: 40%;
 		overflow: auto;
 		white-space: break-spaces;
 	}
 	.controls > button {
-        height: 80px;
+        height: 60px;
 		width: 140px;
         padding: 1rem 1.5rem;
 	}
@@ -673,11 +674,9 @@ Total: $${total}`
 		background-size: contain;
 		background-color: var(--bg-color);
 	}
-	.text {
-		margin-left: 2.5rem;
-	}
 	.price {
 		font-size: 3rem;
+        margin-bottom: -1rem;
 	}
 
     @media (max-width: 900px) {
@@ -738,18 +737,18 @@ Total: $${total}`
 		.flex {
 			flex-wrap: wrap;
 		}
-        .detail {
-            height: auto;
-        }
 		.detail > * {
 			flex-basis: 100%;
-			height: 50%;
+			max-height: 50%;
             min-height: 200px;
 		}
 		.text {
 			margin-left: 0;
 			margin-top: var(--space);
 		}
+        .img {
+		    background-size: cover;
+        }
     }
 
 </style>
