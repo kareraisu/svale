@@ -3,11 +3,9 @@
     import { Button, Modal, Icon } from "svelte-chota"
     import mock from './mocks'
 
-    // SET THIS TO USE LOCAL ENV VARS AND MOCK CONFIG
-    const dev = true
-
     let ENV = {}
     let API = {}
+    let dev = false
     let loading = true
     let welcomed = false
     let config
@@ -61,9 +59,13 @@ Total: $${total}`
     }
 
     async function loadEnv() {
-        if (dev) {
+        try {
             ENV = (await import('../.env')).default
             console.log('Loaded dev env:', ENV)
+            dev = true
+        }
+        catch(err) {
+            // we are in prod, no local ENV file
         }
         API = {
             data: `https://docs.google.com/spreadsheets/d/e/${ENV.SHEET_ID}/pub?gid=0&single=true&output=tsv`,
