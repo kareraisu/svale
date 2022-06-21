@@ -163,7 +163,7 @@ Total: $${total}`
             .replace(new RegExp('  ', 'g'), '\n\n')
             .replace(new RegExp(' •', 'g'), '\n•')
         item.fotos = item.fotos && item.fotos.trim().split(', ').map(f => f.split(' '))
-        item.precio = Math.floor( Number(item.price) * Number(config.xrate) )
+        item.precio = Math.round( Number(item.price) * Number(config.xrate) / 100) * 100
         return item
     }
 
