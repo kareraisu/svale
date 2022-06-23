@@ -294,6 +294,7 @@ Total: $${total}`
     <Modal
         class="card modal"
         bind:open={$modals.detail}
+        onClose={closeModals}
         on:keydown={(e) => ["Escape"].includes(e.key) && ($modals.detail = false)}
     >
         <h4>{currentItem.nombre}</h4>

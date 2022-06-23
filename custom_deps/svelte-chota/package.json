@@ -1,0 +1,71 @@
+{
+  "_args": [
+    [
+      "svelte-chota@1.8.6",
+      "C:\\Users\\imper\\Documents\\work\\me\\svale"
+    ]
+  ],
+  "_from": "svelte-chota@1.8.6",
+  "_id": "svelte-chota@1.8.6",
+  "_inBundle": false,
+  "_integrity": "sha512-lMqvDMcI2Ozyku7QKnn1nN4NuEZy6XF+qMQssLADWX63u78xN8jidQ8QuJpPrSA6JXnC3n4Qu6uRBDS83ZHY8A==",
+  "_location": "/svelte-chota",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "svelte-chota@1.8.6",
+    "name": "svelte-chota",
+    "escapedName": "svelte-chota",
+    "rawSpec": "1.8.6",
+    "saveSpec": null,
+    "fetchSpec": "1.8.6"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/svelte-chota/-/svelte-chota-1.8.6.tgz",
+  "_spec": "1.8.6",
+  "_where": "C:\\Users\\imper\\Documents\\work\\me\\svale",
+  "author": {
+    "name": "Alexey Schebelev"
+  },
+  "bugs": {
+    "url": "https://github.com/AlexxNB/svelte-chota/issues"
+  },
+  "description": "Svelte UI components based on super lightweight chota CSS framework.",
+  "devDependencies": {
+    "esbuild": "^0.8.31",
+    "esbuild-svelte": "^0.4.0",
+    "svelte": "^3.31.2"
+  },
+  "files": [
+    "cmp",
+    "dist"
+  ],
+  "homepage": "https://alexxnb.github.io/svelte-chota",
+  "keywords": [
+    "svelte",
+    "chota",
+    "svelte ui kit",
+    "ui",
+    "ui kit",
+    "sveltejs"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "name": "svelte-chota",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexxNB/svelte-chota.git"
+  },
+  "scripts": {
+    "build": "node esbuild",
+    "docs-build": "cd ./docs_src && npm run build",
+    "docs-dev": "cd ./docs_src && npm run dev",
+    "prepublishOnly": "npm run build"
+  },
+  "svelte": "cmp/index.js",
+  "version": "1.8.6"
+}
